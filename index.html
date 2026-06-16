@@ -316,12 +316,47 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 .ub-uname{font-size:13px;font-weight:600;color:var(--ink)}
 .ub-umeta{font-size:11px;color:var(--ink3);margin-top:1px}
 
-@media(max-width:740px){
-  .app{grid-template-columns:1fr}
-  .sidebar{position:static;height:auto;max-height:220px}
+/* ── MOBILE BACK BUTTON (hidden on desktop) ── */
+.mob-back-btn{
+  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--blue);color:white;border:none;border-radius:25px;
+  padding:13px 28px;font-size:14px;font-weight:700;font-family:'Sarabun',sans-serif;
+  cursor:pointer;z-index:60;box-shadow:0 4px 20px rgba(26,95,168,.45);
+  align-items:center;gap:8px;white-space:nowrap;
+}
+
+@media(max-width:767px){
+  /* Stack layout — sidebar overlays full screen */
+  .app{display:block}
+  .sidebar{
+    position:fixed;inset:0;z-index:50;
+    height:100dvh;max-height:none;
+    transform:translateX(0);
+    transition:transform .25s cubic-bezier(.4,0,.2,1);
+  }
+  .sidebar.mob-hidden{transform:translateX(-100%)}
+
+  /* Main content full width */
+  .main{padding:16px 16px 100px;min-height:100vh}
+
+  /* Clinic header — wrap score circle below name on narrow screens */
+  .clinic-header{flex-wrap:wrap}
+  .ch-right{width:100%;display:flex;align-items:center;gap:16px;justify-content:flex-start;margin-top:4px}
+  .score-circle{width:60px;height:60px}
+  .sc-num{font-size:20px}
+
+  /* Overview grid 2 cols on mobile */
   .ov-grid{grid-template-columns:repeat(2,1fr)}
+
+  /* Smaller score buttons */
   .score-btns{gap:2px}
   .sb-btn{width:23px;height:23px;font-size:10px}
+
+  /* Session cards full width */
+  .sess-card{margin-bottom:10px}
+
+  /* Back button visible on mobile */
+  .mob-back-btn{display:flex !important}
 }
 </style>
 </head>
@@ -1065,7 +1100,7 @@ function removePdf(cid, i){
 }
 
 /* ═══ RENDER CLINIC ═══ */
-function selectClinic(id){activeId=id;renderSidebar();var c=clinics.find(function(x){return x.id===id});if(c)renderClinic(c);}
+function selectClinic(id){activeId=id;renderSidebar();var c=clinics.find(function(x){return x.id===id});if(c){renderClinic(c);hideMobSidebar();}}
 
 function renderClinic(c){
   var main=document.getElementById('main');
@@ -1523,6 +1558,30 @@ function init(){
   });
 }
 
+/* ═══ MOBILE NAV ═══ */
+function isMob(){ return window.innerWidth <= 767; }
+
+function showMobSidebar(){
+  document.querySelector('.sidebar').classList.remove('mob-hidden');
+  var btn = document.getElementById('mob-back');
+  if(btn) btn.style.display = 'none';
+}
+
+function hideMobSidebar(){
+  if(!isMob()) return;
+  document.querySelector('.sidebar').classList.add('mob-hidden');
+  var btn = document.getElementById('mob-back');
+  if(btn) btn.style.display = 'flex';
+}
+
+window.addEventListener('resize', function(){
+  if(!isMob()){
+    document.querySelector('.sidebar').classList.remove('mob-hidden');
+    var btn = document.getElementById('mob-back');
+    if(btn) btn.style.display = 'none';
+  }
+});
+
 init();
 
 if ('serviceWorker' in navigator) {
@@ -1531,5 +1590,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<button class="mob-back-btn" id="mob-back" onclick="showMobSidebar()">← รายการคลินิก</button>
 </body>
 </html>
