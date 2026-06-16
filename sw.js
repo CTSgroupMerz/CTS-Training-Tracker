@@ -1,4 +1,4 @@
-var CACHE = 'cts-v10';
+var CACHE = 'cts-v11';
 var ASSETS = ['./', './index.html', './manifest.json', './icons/icon.svg'];
 
 self.addEventListener('install', function(e) {
@@ -18,8 +18,8 @@ self.addEventListener('activate', function(e) {
 });
 
 self.addEventListener('fetch', function(e) {
-  // ไม่ cache GAS API calls
-  if (e.request.url.includes('script.google.com') || e.request.url.includes('googleapis.com')) return;
+  // ไม่ cache GAS API calls (รวม redirect target ที่ googleusercontent.com)
+  if (e.request.url.includes('script.google.com') || e.request.url.includes('googleapis.com') || e.request.url.includes('googleusercontent.com')) return;
   // ไม่ cache Google Fonts (ถ้า offline จะใช้ fallback font)
   if (e.request.url.includes('fonts.googleapis') || e.request.url.includes('fonts.gstatic')) return;
 
