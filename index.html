@@ -1575,6 +1575,7 @@ function deleteClinic(){
   clinics=clinics.filter(function(x){return x.id!==cid});
   closeModal(); saveToStorage(); activeId=null; renderSidebar();
   document.getElementById('main').innerHTML='<div class="empty-state"><div class="es-icon">🏥</div><div class="es-title">เลือกคลินิกจากรายการ</div><div class="es-desc">หรือกด "+ เพิ่มคลินิกใหม่"</div></div>';
+  if(isMob()) showMobSidebar();
 }
 document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
 document.getElementById('user-overlay').addEventListener('click',function(e){if(e.target===this)closeUserModal();});
