@@ -92,6 +92,63 @@ body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);f
 .sb-footer{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);margin-top:auto}
 .sf-date{font-size:9.5px;color:rgba(255,255,255,.22);font-family:'DM Mono',monospace;text-align:center}
 .sf-storage{font-size:9px;color:rgba(255,255,255,.18);text-align:center;margin-top:3px}
+/* ── DASHBOARD BUTTON ── */
+.dash-nav-btn{margin:6px 8px 2px;padding:8px 12px;border-radius:9px;border:none;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);font-family:'Sarabun',sans-serif;font-size:12px;cursor:pointer;width:calc(100% - 16px);text-align:left;transition:all .15s;display:flex;align-items:center;gap:7px}
+.dash-nav-btn:hover{background:rgba(255,255,255,.12);color:rgba(255,255,255,.85)}
+.dash-nav-btn.active{background:rgba(255,255,255,.14);color:white;font-weight:600}
+/* ── DASHBOARD PANEL ── */
+.dash-wrap{padding:22px 24px 80px;overflow-y:auto}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.dash-title{font-size:20px;font-weight:800;color:var(--ink)}
+.dash-sub{font-size:13px;font-weight:400;color:var(--ink3);margin-left:8px}
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.dash-card{border-radius:12px;padding:14px 16px;cursor:pointer;transition:transform .1s,box-shadow .1s;border:1.5px solid transparent}
+.dash-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.dash-card.dc-active{border-color:currentColor}
+.dc-icon{font-size:22px;margin-bottom:6px}
+.dc-num{font-size:28px;font-weight:800;line-height:1}
+.dc-label{font-size:11px;font-weight:600;margin-top:4px;opacity:.7;letter-spacing:.03em}
+/* Filter chips */
+.dash-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.dash-chip{padding:4px 11px;border-radius:20px;border:1.5px solid var(--border2);background:white;color:var(--ink2);font-size:12px;font-family:'Sarabun',sans-serif;cursor:pointer;transition:all .12s;font-weight:500}
+.dash-chip:hover{border-color:var(--blue);color:var(--blue)}
+.dash-chip.active{background:var(--blue);border-color:var(--blue);color:white}
+.dash-chip-sep{width:1px;background:var(--border2);margin:0 2px;border:none}
+/* Tabs */
+.dash-tabs{display:flex;gap:2px;background:var(--border);padding:3px;border-radius:10px;margin-bottom:18px;width:fit-content}
+.dash-tab{padding:6px 16px;border-radius:8px;border:none;background:transparent;font-family:'Sarabun',sans-serif;font-size:13px;font-weight:600;color:var(--ink3);cursor:pointer;transition:all .15s}
+.dash-tab.active{background:white;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+/* Status section */
+.dash-status-section{margin-bottom:16px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border)}
+.dash-status-head{padding:10px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px}
+.dash-status-clinic{display:flex;align-items:center;justify-content:space-between;padding:9px 16px;border-top:1px solid var(--border);cursor:pointer;transition:background .12s}
+.dash-status-clinic:hover{background:var(--surface)}
+.dsc-name{font-size:13px;font-weight:600;color:var(--ink)}
+.dsc-right{display:flex;align-items:center;gap:8px}
+.dsc-tag{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.dsc-score{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;min-width:36px;text-align:right}
+.dsc-who{font-size:10.5px;color:var(--ink3)}
+.dash-empty{text-align:center;padding:32px;color:var(--ink3);font-size:13px}
+/* Monthly */
+.dash-month-group{margin-bottom:14px}
+.dash-month-label{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);font-family:'DM Mono',monospace;padding:4px 0;border-bottom:1.5px solid var(--border);margin-bottom:8px}
+.dash-month-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background .12s}
+.dash-month-row:hover{background:var(--surface)}
+.dmr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.dmr-name{flex:1;font-size:13px;font-weight:600;color:var(--ink)}
+.dmr-meta{font-size:11px;color:var(--ink3)}
+.dmr-score{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;min-width:30px;text-align:right}
+/* Person table */
+.dash-person-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.dash-person-table th{background:var(--surface);padding:9px 12px;text-align:left;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.06em;text-transform:uppercase;border-bottom:2px solid var(--border)}
+.dash-person-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+.dash-person-table tr:last-child td{border-bottom:none}
+.dash-person-table tr:hover td{background:var(--surface)}
+.dpt-name{font-weight:700;color:var(--ink)}
+.dpt-badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.dpt-score{font-family:'DM Mono',monospace;font-weight:700}
+.dpt-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;margin-top:3px;min-width:60px}
+.dpt-bar-fill{height:100%;border-radius:3px;transition:width .3s}
 .sf-credits{font-size:9px;color:rgba(255,255,255,.38);text-align:center;margin-top:8px;line-height:1.8;border-top:1px solid rgba(255,255,255,.1);padding-top:8px}
 .sf-credits span{display:block;color:rgba(255,255,255,.25)}.sf-credits strong{color:rgba(255,255,255,.6);font-weight:600;display:block}
 
@@ -385,6 +442,11 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 
   /* Add button */
   .add-btn{margin:12px 8px 12px;width:calc(100% - 16px)}
+  /* Dashboard mobile */
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .dash-person-table th,.dash-person-table td{font-size:11px;padding:7px 8px}
+  .dash-status-clinic{flex-direction:column;align-items:flex-start;gap:4px}
+  .dash-status-clinic .dsc-right{flex-direction:row;flex-wrap:wrap}
 }
 </style>
 </head>
@@ -437,6 +499,7 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
         <span class="ft-count" id="fc-mine">0</span>ของฉัน
       </button>
     </div>
+    <button class="dash-nav-btn" id="dash-nav-btn" onclick="showDashboard()">📊 <span>Dashboard · สรุปภาพรวม</span></button>
     <div class="sb-section-label" id="sb-filter-label">คลินิกทั้งหมด</div>
     <div class="clinic-list" id="clinic-list"></div>
     <button class="add-btn" onclick="openModal()"><span style="font-size:15px">+</span> เพิ่มคลินิกใหม่</button>
@@ -1161,6 +1224,7 @@ function removePdf(cid, i){
 /* ═══ RENDER CLINIC ═══ */
 function selectClinic(id){
   activeId=id;renderSidebar();
+  var db=document.getElementById('dash-nav-btn'); if(db) db.classList.remove('active');
   var c=clinics.find(function(x){return x.id===id});
   if(c){ renderClinic(c); if(isMob()) hideMobSidebar(); }
 }
@@ -1635,6 +1699,240 @@ function hideMobSidebar(){
   document.querySelector('.sidebar').classList.add('mob-hidden');
   document.querySelector('.main').classList.add('mob-visible');
   window.scrollTo(0,0);
+}
+
+/* ══════════════════════════════════════════════
+   DASHBOARD
+══════════════════════════════════════════════ */
+var _dashTab = 'overview';
+var _dashF = { status:'all', pkg:'all', cts:'all' };
+
+function showDashboard(){
+  activeId = null;
+  document.getElementById('dash-nav-btn').classList.add('active');
+  if(isMob()) hideMobSidebar();
+  _renderDashboard();
+}
+
+function _dashApplyFilters(list){
+  return list.filter(function(c){
+    if(_dashF.pkg !== 'all' && c.pkg !== _dashF.pkg) return false;
+    if(_dashF.cts !== 'all' && c.ctsTeam !== _dashF.cts) return false;
+    if(_dashF.status !== 'all'){
+      var sc = calcScore(c).total;
+      if(_dashF.status==='green'  && !(sc!==null && sc>=70)) return false;
+      if(_dashF.status==='amber'  && !(sc!==null && sc>=50 && sc<70)) return false;
+      if(_dashF.status==='red'    && !(sc!==null && sc<50)) return false;
+      if(_dashF.status==='pending'&& sc!==null) return false;
+    }
+    return true;
+  });
+}
+
+function _clinicMs(c){ var t=parseInt((c.id||'').split('_')[0]); return isNaN(t)?0:t; }
+function _clinicMonth(c){
+  var ms=_clinicMs(c); if(!ms) return 'ไม่ทราบ';
+  var d=new Date(ms);
+  var m=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return m[d.getMonth()]+' '+(d.getFullYear()+543);
+}
+function _scoreColor(s){ return s===null?'#9C9A92':s>=70?'#1A7A3C':s>=50?'#B85C00':'#C0392B'; }
+function _scoreBg(s){    return s===null?'#F0EFEA':s>=70?'#E6F5EC':s>=50?'#FEF0DC':'#FDECEA'; }
+function _scoreLabel(s){ return s===null?'⏳':s>=70?'🟢':s>=50?'🟡':'🔴'; }
+
+function _chipEl(key,val,label,active){
+  return '<button class="dash-chip'+(active?' active':'')+'" onclick="_setDashF(\''+key+'\',\''+val+'\')">'+(label)+'</button>';
+}
+function _setDashF(key,val){ _dashF[key]=val; _renderDashboard(); }
+function _setDashTab(t){ _dashTab=t; _renderDashboard(); }
+
+function _renderDashboard(){
+  var main = document.getElementById('main');
+  var all  = _dashApplyFilters(clinics);
+  var green=[],amber=[],red=[],pending=[];
+  all.forEach(function(c){
+    var s=calcScore(c).total;
+    if(s===null) pending.push(c);
+    else if(s>=70) green.push(c);
+    else if(s>=50) amber.push(c);
+    else red.push(c);
+  });
+
+  var h = '<div class="dash-wrap">';
+
+  // ── Header
+  h += '<div class="dash-header"><div class="dash-title">📊 Dashboard<span class="dash-sub">สรุปภาพรวม</span></div></div>';
+
+  // ── Status cards
+  h += '<div class="dash-grid">';
+  var cards=[
+    {icon:'🟢',label:'On Track',count:green.length,color:'#1A7A3C',bg:'#E6F5EC',key:'green'},
+    {icon:'🟡',label:'ต้องปรับ',count:amber.length,color:'#B85C00',bg:'#FEF0DC',key:'amber'},
+    {icon:'🔴',label:'เร่งด่วน',count:red.length,color:'#C0392B',bg:'#FDECEA',key:'red'},
+    {icon:'⏳',label:'รอข้อมูล',count:pending.length,color:'#5C5C58',bg:'#F0EFEA',key:'pending'}
+  ];
+  cards.forEach(function(cd){
+    var isActive = _dashF.status===cd.key;
+    h += '<div class="dash-card'+(isActive?' dc-active':'')+'" style="background:'+cd.bg+';color:'+cd.color+'" onclick="_setDashF(\'status\',\''+(isActive?'all':cd.key)+'\')">';
+    h += '<div class="dc-icon">'+cd.icon+'</div>';
+    h += '<div class="dc-num">'+cd.count+'</div>';
+    h += '<div class="dc-label">'+cd.label+'</div></div>';
+  });
+  h += '</div>';
+
+  // ── Filters
+  h += '<div class="dash-filters">';
+  h += _chipEl('pkg','all','ทุก Package',_dashF.pkg==='all');
+  h += _chipEl('pkg','E','MAX-Entry',_dashF.pkg==='E');
+  h += _chipEl('pkg','A','MAX-A',_dashF.pkg==='A');
+  h += _chipEl('pkg','B','MAX-B',_dashF.pkg==='B');
+  h += '<div class="dash-chip-sep"></div>';
+  h += _chipEl('cts','all','ทีมทั้งหมด',_dashF.cts==='all');
+  h += _chipEl('cts','V','CTS-V',_dashF.cts==='V');
+  h += _chipEl('cts','C','CTS-C',_dashF.cts==='C');
+  h += _chipEl('cts','W','CTS-W',_dashF.cts==='W');
+  h += '</div>';
+
+  // ── Tabs
+  h += '<div class="dash-tabs">';
+  ['overview','monthly','person'].forEach(function(t,i){
+    var labels=['ภาพรวม','รายเดือน','รายบุคคล'];
+    h += '<button class="dash-tab'+(_dashTab===t?' active':'')+'" onclick="_setDashTab(\''+t+'\')">'+labels[i]+'</button>';
+  });
+  h += '</div>';
+
+  // ── Tab content
+  h += '<div class="dash-content">';
+  if(_dashTab==='overview')  h += _dashOverview(green,amber,red,pending);
+  else if(_dashTab==='monthly') h += _dashMonthly(all);
+  else h += _dashPerson(all);
+  h += '</div></div>';
+
+  main.innerHTML = h;
+}
+
+function _clinicRow(c,showWho){
+  var sc=calcScore(c).total;
+  var pkgLbl=c.pkg==='E'?'Entry':c.pkg==='A'?'MAX-A':'MAX-B';
+  var pkgColor=c.pkg==='E'?'#4A3DB5':'#0B6B52';
+  var h='<div class="dash-status-clinic" onclick="selectClinic(\''+c.id+'\')">';
+  h+='<div><div class="dsc-name">'+c.name+'</div>';
+  if(showWho&&c.createdBy) h+='<div class="dsc-who">'+c.createdBy+(c.ctsTeam?' · CTS-'+c.ctsTeam:'')+'</div>';
+  h+='</div>';
+  h+='<div class="dsc-right">';
+  h+='<span class="dsc-tag" style="background:'+_scoreBg(sc)+';color:'+_scoreColor(sc)+'">'+_scoreLabel(sc)+(sc!==null?' '+sc:'')+'</span>';
+  h+='<span class="dsc-tag" style="background:#F0EFEA;color:#4A3DB5">'+pkgLbl+'</span>';
+  if(c.ctsTeam) h+='<span class="dsc-tag" style="background:#EAF3FC;color:#1A5FA8">CTS-'+c.ctsTeam+'</span>';
+  h+='</div></div>';
+  return h;
+}
+
+function _dashOverview(green,amber,red,pending){
+  if(!green.length&&!amber.length&&!red.length&&!pending.length)
+    return '<div class="dash-empty">ไม่มีคลินิกตาม filter ที่เลือก</div>';
+  var h='';
+  var sections=[
+    {list:green, color:'#1A7A3C', bg:'#E6F5EC', label:'🟢 On Track'},
+    {list:amber, color:'#B85C00', bg:'#FEF0DC', label:'🟡 ต้องปรับปรุง'},
+    {list:red,   color:'#C0392B', bg:'#FDECEA', label:'🔴 เร่งด่วน'},
+    {list:pending,color:'#5C5C58',bg:'#F0EFEA', label:'⏳ รอข้อมูล'}
+  ];
+  sections.forEach(function(sec){
+    if(!sec.list.length) return;
+    h+='<div class="dash-status-section">';
+    h+='<div class="dash-status-head" style="background:'+sec.bg+';color:'+sec.color+'">'+sec.label+'<span style="margin-left:auto;font-weight:400;font-size:12px">'+sec.list.length+' คลินิก</span></div>';
+    sec.list.forEach(function(c){ h+=_clinicRow(c,true); });
+    h+='</div>';
+  });
+  return h;
+}
+
+function _dashMonthly(list){
+  if(!list.length) return '<div class="dash-empty">ไม่มีคลินิกตาม filter ที่เลือก</div>';
+  var groups={}, order=[];
+  list.forEach(function(c){
+    var m=_clinicMonth(c);
+    if(!groups[m]){ groups[m]=[]; order.push(m); }
+    groups[m].push(c);
+  });
+  // sort months chronologically by timestamp
+  order.sort(function(a,b){
+    var ta=0,tb=0;
+    list.forEach(function(c){ if(_clinicMonth(c)===a && _clinicMs(c)>ta) ta=_clinicMs(c); });
+    list.forEach(function(c){ if(_clinicMonth(c)===b && _clinicMs(c)>tb) tb=_clinicMs(c); });
+    return ta-tb;
+  });
+  var h='';
+  order.forEach(function(m){
+    h+='<div class="dash-month-group">';
+    h+='<div class="dash-month-label">'+m+' &nbsp;·&nbsp; '+groups[m].length+' คลินิก</div>';
+    groups[m].forEach(function(c){
+      var sc=calcScore(c).total;
+      var done=c.sessions.filter(function(s){return s.done}).length;
+      var total=c.sdefs?c.sdefs.length:1;
+      h+='<div class="dash-month-row" onclick="selectClinic(\''+c.id+'\')">';
+      h+='<div class="dmr-dot" style="background:'+_scoreColor(sc)+'"></div>';
+      h+='<div class="dmr-name">'+c.name+'</div>';
+      h+='<div class="dmr-meta">'+(c.createdBy||'–')+' · '+done+'/'+total+' sessions</div>';
+      h+='<div class="dmr-score" style="color:'+_scoreColor(sc)+'">'+(sc!==null?sc:'–')+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  return h;
+}
+
+function _dashPerson(list){
+  if(!list.length) return '<div class="dash-empty">ไม่มีคลินิกตาม filter ที่เลือก</div>';
+  // group by createdBy (team member name)
+  var groups={}, order=[];
+  list.forEach(function(c){
+    var who=c.createdBy||'ไม่ระบุ';
+    if(!groups[who]){ groups[who]={clinics:[],scores:[]}; order.push(who); }
+    groups[who].clinics.push(c);
+    var s=calcScore(c).total; if(s!==null) groups[who].scores.push(s);
+  });
+  // sort by total clinics desc
+  order.sort(function(a,b){ return groups[b].clinics.length - groups[a].clinics.length; });
+
+  var h='<div style="overflow-x:auto">';
+  h+='<table class="dash-person-table">';
+  h+='<thead><tr><th>ผู้รับผิดชอบ</th><th>คลินิก</th><th>🟢</th><th>🟡</th><th>🔴</th><th>⏳</th><th>Avg Score</th></tr></thead><tbody>';
+
+  order.forEach(function(who){
+    var g=groups[who];
+    var green=0,amber=0,red=0,pend=0;
+    g.clinics.forEach(function(c){
+      var s=calcScore(c).total;
+      if(s===null) pend++;
+      else if(s>=70) green++;
+      else if(s>=50) amber++;
+      else red++;
+    });
+    var avg=g.scores.length?Math.round(g.scores.reduce(function(a,b){return a+b},0)/g.scores.length):null;
+    var avgColor=_scoreColor(avg);
+    h+='<tr>';
+    h+='<td><div class="dpt-name">'+who+'</div></td>';
+    h+='<td><strong>'+g.clinics.length+'</strong></td>';
+    h+='<td style="color:#1A7A3C;font-weight:700">'+green+'</td>';
+    h+='<td style="color:#B85C00;font-weight:700">'+amber+'</td>';
+    h+='<td style="color:#C0392B;font-weight:700">'+red+'</td>';
+    h+='<td style="color:#5C5C58">'+pend+'</td>';
+    h+='<td><div class="dpt-score" style="color:'+avgColor+'">'+(avg!==null?avg:'–')+'</div>';
+    if(avg!==null) h+='<div class="dpt-bar"><div class="dpt-bar-fill" style="width:'+Math.min(avg,100)+'%;background:'+avgColor+'"></div></div>';
+    h+='</td></tr>';
+    // expandable clinic list per person
+    h+='<tr><td colspan="7" style="padding:0 12px 10px">';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:5px">';
+    g.clinics.forEach(function(c){
+      var s=calcScore(c).total;
+      h+='<span onclick="selectClinic(\''+c.id+'\')" style="cursor:pointer;padding:3px 9px;border-radius:8px;font-size:11px;background:'+_scoreBg(s)+';color:'+_scoreColor(s)+';font-weight:600">'+_scoreLabel(s)+' '+c.name+'</span>';
+    });
+    h+='</div></td></tr>';
+  });
+
+  h+='</tbody></table></div>';
+  return h;
 }
 
 window.addEventListener('resize', function(){
