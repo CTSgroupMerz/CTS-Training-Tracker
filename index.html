@@ -300,8 +300,11 @@ select.sel-in:focus{border-color:var(--blue);background:white}
 .pdf-size{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;flex-shrink:0}
 .pdf-remove{border:none;background:none;cursor:pointer;color:var(--ink3);font-size:14px;padding:0;flex-shrink:0}
 .pdf-remove:hover{color:var(--red)}
-.pdf-view-btn{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--purple-l);color:var(--purple);border:1px solid #C5BFF5;cursor:pointer;font-family:'Sarabun',sans-serif;flex-shrink:0}
+.pdf-view-btn{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--purple-l);color:var(--purple);border:1px solid #C5BFF5;cursor:pointer;font-family:'Sarabun',sans-serif;flex-shrink:0;text-decoration:none}
 .pdf-view-btn:hover{background:var(--purple);color:white}
+.pdf-uploading{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#F8F5FF;border-radius:8px;border:1px solid #C5BFF5;font-size:12px;color:var(--purple)}
+.pdf-spinner{width:14px;height:14px;border:2px solid #C5BFF5;border-top-color:var(--purple);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.pdf-drive-badge{font-size:9px;padding:1px 5px;border-radius:4px;background:#E8F0FE;color:#1A73E8;font-weight:700;font-family:'DM Mono',monospace;flex-shrink:0}
 
 /* D+14 INLINE */
 .d14-inline{background:var(--orange-l);border:1px solid #F5C090;border-radius:9px;padding:11px 13px;margin-top:11px}
@@ -719,7 +722,12 @@ function _syncToGAS(ts){
   showSyncStatus('syncing');
   var syncable = clinics.map(function(c){
     var cp = JSON.parse(JSON.stringify(c));
-    if(cp.pdfFiles) cp.pdfFiles = cp.pdfFiles.map(function(){ return null; });
+    // เก็บเฉพาะ Drive URL (ไม่ sync base64 dataUrl เพราะใหญ่เกิน)
+    if(cp.pdfFiles) cp.pdfFiles = cp.pdfFiles.map(function(f){
+      if(!f) return null;
+      if(f.url) return {name:f.name,size:f.size,url:f.url,uploadedBy:f.uploadedBy};
+      return null;
+    });
     delete cp.sdefs;
     return cp;
   });
@@ -1150,19 +1158,31 @@ function buildHandSkillHTML(c, i){
 
   // PDF section
   var pdfHTML = '';
-  if(pf){
+  if(pf && pf.url){
+    // ไฟล์ใน Google Drive — ทีมเห็นทุกคน
+    var who = pf.uploadedBy ? ' · '+pf.uploadedBy : '';
     pdfHTML = `<div class="pdf-attached">
       <span style="font-size:16px">📄</span>
       <span class="pdf-name" title="${pf.name}">${pf.name}</span>
-      <span class="pdf-size">${pf.size}</span>
-      <button class="pdf-view-btn" onclick="viewPdf('${c.id}',${i})">เปิด</button>
+      <span class="pdf-drive-badge">DRIVE</span>
+      <span class="pdf-size">${pf.size||''}${who}</span>
+      <a class="pdf-view-btn" href="${pf.url}" target="_blank" rel="noopener">เปิด</a>
       <button class="pdf-remove" onclick="removePdf('${c.id}',${i})" title="ลบไฟล์">×</button>
     </div>`;
+  } else if(pf && pf.dataUrl){
+    // ไฟล์เก่า (local only) — แสดงพร้อมแจ้งให้อัปโหลดใหม่
+    pdfHTML = `<div class="pdf-attached" style="border-color:#FBB040">
+      <span style="font-size:16px">📄</span>
+      <span class="pdf-name" title="${pf.name}" style="color:var(--amber)">${pf.name}</span>
+      <span class="pdf-size" style="color:var(--amber)">เครื่องนี้เท่านั้น</span>
+      <button class="pdf-view-btn" onclick="viewPdf('${c.id}',${i})" style="background:var(--amber-l);color:var(--amber);border-color:#FBB040">เปิด</button>
+      <button class="pdf-remove" onclick="removePdf('${c.id}',${i})" title="ลบแล้วอัปโหลดใหม่">×</button>
+    </div>`;
   } else {
-    pdfHTML = `<label class="pdf-drop" title="อัปโหลดใบประเมิน PDF">
-      <span style="font-size:18px">📎</span>
-      <span>อัปโหลดใบประเมิน PDF — คลิกหรือลากไฟล์มาวาง</span>
-      <input type="file" accept=".pdf,application/pdf" onchange="handlePdfUpload(event,'${c.id}',${i})">
+    pdfHTML = `<label class="pdf-drop" title="อัปโหลดไฟล์ขึ้น Google Drive ทีมเห็นทุกคน">
+      <span style="font-size:18px">☁️</span>
+      <span>อัปโหลดใบประเมิน → Google Drive (ทีมเห็นทุกคน)</span>
+      <input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/*" onchange="handlePdfUpload(event,'${c.id}',${i})">
     </label>`;
   }
 
@@ -1192,16 +1212,55 @@ function setHandSkill(cid, i, val){
 function handlePdfUpload(evt, cid, i){
   var file=evt.target.files[0]; if(!file)return;
   var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
-  var maxMB=10;
-  if(file.size>maxMB*1024*1024){ alert('ไฟล์ใหญ่เกิน '+maxMB+'MB กรุณาบีบอัดก่อนอัปโหลด'); return; }
+  var maxMB=20;
+  if(file.size>maxMB*1024*1024){ alert('ไฟล์ใหญ่เกิน '+maxMB+' MB'); return; }
+  if(!GAS_URL){ alert('ยังไม่ได้ตั้งค่า GAS URL'); return; }
+
   var sizeStr = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
+
+  // แสดง spinner
+  var wrap=document.getElementById('skill-wrap-'+cid+'-'+i);
+  if(wrap){
+    var wrapEl=wrap.querySelector('.pdf-upload-wrap');
+    if(wrapEl) wrapEl.innerHTML='<span class="pdf-upload-label">แนบใบประเมิน</span>'
+      +'<div class="pdf-uploading"><div class="pdf-spinner"></div>กำลังอัปโหลด '+file.name+' ขึ้น Google Drive...</div>';
+  }
+
+  // คำนวณชื่อเดือนสำหรับโฟลเดอร์
+  var now=new Date();
+  var thM=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  var monthLabel=thM[now.getMonth()]+' '+(now.getFullYear()+543);
+
   var reader=new FileReader();
-  reader.onload=function(e){
-    c.pdfFiles[i]={name:file.name, size:sizeStr, dataUrl:e.target.result};
-    markEdit(cid);
-    var wrap=document.getElementById('skill-wrap-'+cid+'-'+i);
-    if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i);
-    saveToStorage();
+  reader.onload=function(ev){
+    var base64=ev.target.result.split(',')[1];
+    fetch(GAS_URL,{
+      method:'POST',
+      headers:{'Content-Type':'text/plain'},
+      body:JSON.stringify({
+        action:'upload',
+        fileName:file.name,
+        fileData:base64,
+        mimeType:file.type||'application/pdf',
+        month:monthLabel
+      })
+    })
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res.status==='ok'){
+        c.pdfFiles[i]={name:file.name,size:sizeStr,url:res.url,uploadedBy:currentUser?currentUser.name:'unknown'};
+        markEdit(cid);
+        if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+        saveToStorage();
+      } else {
+        alert('อัปโหลดไม่สำเร็จ: '+(res.message||'unknown error'));
+        if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+      }
+    })
+    .catch(function(err){
+      alert('เชื่อมต่อ GAS ไม่ได้: '+err.message);
+      if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+    });
   };
   reader.readAsDataURL(file);
 }
@@ -1209,7 +1268,8 @@ function handlePdfUpload(evt, cid, i){
 function viewPdf(cid, i){
   var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
   var pf=c.pdfFiles&&c.pdfFiles[i]; if(!pf)return;
-  var win=window.open(); win.document.write('<iframe src="'+pf.dataUrl+'" width="100%" height="100%" style="border:none"></iframe>');
+  if(pf.url){ window.open(pf.url,'_blank'); return; }
+  if(pf.dataUrl){ var w=window.open(); w.document.write('<iframe src="'+pf.dataUrl+'" width="100%" height="100%" style="border:none"></iframe>'); }
 }
 
 function removePdf(cid, i){

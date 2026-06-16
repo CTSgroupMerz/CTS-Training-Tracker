@@ -1,4 +1,4 @@
-var CACHE = 'cts-v6';
+var CACHE = 'cts-v7';
 var ASSETS = ['./', './index.html', './manifest.json', './icons/icon.svg'];
 
 self.addEventListener('install', function(e) {

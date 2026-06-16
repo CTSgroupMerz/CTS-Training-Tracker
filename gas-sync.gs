@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════
-//  CTS Training Tracker — GAS Sync Backend
+//  CTS Training Tracker — GAS Sync + Drive Upload
 //  วิธี redeploy:
 //  1. แทนที่ code ทั้งหมดใน Apps Script ด้วยไฟล์นี้
 //  2. Deploy > Manage deployments > Edit (ดินสอ)
@@ -8,32 +8,31 @@
 // ════════════════════════════════════════════════
 
 var SPREADSHEET_ID = '1u53rZoP87tO2CiZTD7WugV2SE2zpQn7itPZivnddmUQ';
-var SHEET_NAME = 'ClinicsData';
+var SHEET_NAME     = 'ClinicsData';
+var DRIVE_FOLDER   = 'CTS Training Files';  // ชื่อโฟลเดอร์หลักใน Drive
 
+// ── GET: โหลดข้อมูลคลินิก
 function doGet(e) {
   return _load();
 }
 
+// ── POST: บันทึกข้อมูล หรือ อัปโหลดไฟล์
 function doPost(e) {
   try {
-    var payload;
-    // รับได้ทั้ง form POST (e.parameter.payload) และ raw JSON POST (e.postData.contents)
-    if (e.parameter && e.parameter.payload) {
-      payload = JSON.parse(e.parameter.payload);
+    var body;
+    if (e.postData && e.postData.contents) {
+      body = JSON.parse(e.postData.contents);
+    } else if (e.parameter && e.parameter.payload) {
+      body = JSON.parse(e.parameter.payload);
     } else {
-      payload = JSON.parse(e.postData.contents);
+      throw new Error('No payload');
     }
 
-    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-    sh.getRange('A1').setValue(payload.data);
-    sh.getRange('B1').setValue(payload.ts);
-    sh.getRange('C1').setValue(new Date().toISOString());
-    sh.getRange('D1').setValue(payload.user || 'unknown');
+    if (body.action === 'upload') {
+      return _uploadToDrive(body);
+    }
+    return _saveData(body);
 
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', ts: payload.ts }))
-      .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
@@ -41,6 +40,59 @@ function doPost(e) {
   }
 }
 
+// ── บันทึกข้อมูลคลินิกลง Sheets
+function _saveData(body) {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
+  sh.getRange('A1').setValue(body.data);
+  sh.getRange('B1').setValue(body.ts);
+  sh.getRange('C1').setValue(new Date().toISOString());
+  sh.getRange('D1').setValue(body.user || 'unknown');
+  return ContentService
+    .createTextOutput(JSON.stringify({ status: 'ok', ts: body.ts }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── อัปโหลดไฟล์ขึ้น Google Drive แยกโฟลเดอร์ตามเดือน
+function _uploadToDrive(body) {
+  var fileName  = body.fileName;
+  var base64    = body.fileData;
+  var mimeType  = body.mimeType || 'application/pdf';
+  var monthLabel = body.month;   // เช่น "มิ.ย. 2569"
+
+  // โฟลเดอร์หลัก
+  var rootFolders = DriveApp.getFoldersByName(DRIVE_FOLDER);
+  var root = rootFolders.hasNext()
+    ? rootFolders.next()
+    : DriveApp.createFolder(DRIVE_FOLDER);
+
+  // โฟลเดอร์ย่อยตามเดือน
+  var subFolders = root.getFoldersByName(monthLabel);
+  var monthFolder = subFolders.hasNext()
+    ? subFolders.next()
+    : root.createFolder(monthLabel);
+
+  // สร้างไฟล์
+  var bytes = Utilities.base64Decode(base64);
+  var blob  = Utilities.newBlob(bytes, mimeType, fileName);
+  var file  = monthFolder.createFile(blob);
+
+  // เปิดให้ทุกคนที่มีลิงก์ดูได้
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  var viewUrl = 'https://drive.google.com/file/d/' + file.getId() + '/view';
+
+  return ContentService
+    .createTextOutput(JSON.stringify({
+      status: 'ok',
+      url:    viewUrl,
+      id:     file.getId(),
+      name:   fileName
+    }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── โหลดข้อมูลคลินิกจาก Sheets
 function _load() {
   try {
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
