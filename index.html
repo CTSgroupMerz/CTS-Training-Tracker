@@ -57,6 +57,10 @@ body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);f
 .sb-title{font-size:16px;font-weight:700;color:white;line-height:1.25;margin-bottom:4px}
 .sb-sub{font-size:11px;color:rgba(255,255,255,.3);line-height:1.5}
 .sb-sync{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace}
+.sync-btn{margin-left:auto;background:rgba(255,255,255,.08);border:none;border-radius:5px;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 7px;font-size:12px;line-height:1;transition:all .15s;flex-shrink:0}
+.sync-btn:hover{background:rgba(255,255,255,.16);color:white}
+.sync-btn:disabled{opacity:.3;cursor:default}
+.sync-btn.spinning{animation:spin .7s linear infinite}
 .sync-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .sb-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
@@ -407,7 +411,8 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
       <div class="sb-title">Clinic Outcome<br>Tracker</div>
       <div class="sb-sub">วัดผลการเทรนแยกรายคลินิก</div>
       <div class="sb-sync" id="sync-status">
-        <span class="sync-dot"></span> ข้อมูลเก็บในเครื่อง · บันทึกอัตโนมัติ
+        <span class="sync-dot"></span> กำลังโหลด...
+        <button class="sync-btn" id="sync-btn" onclick="manualSync()" title="Sync ใหม่">↻</button>
       </div>
     </div>
     <div class="sb-stats">
@@ -597,15 +602,28 @@ function mkClinic(name,pkg,numSess,level,numDocs,ctsTeam,startDate,createdBy){
 
 /* ═══ STORAGE ═══ */
 /* ═══ SYNC STATUS ═══ */
+var _syncBusy = false;
+function _btn(){ return document.getElementById('sync-btn'); }
+
 function showSyncStatus(state){
   var si = document.getElementById('sync-status');
   if(!si) return;
-  if(state==='saving')   si.innerHTML='<span class="sync-dot" style="background:#FBB040"></span> กำลังบันทึก...';
-  else if(state==='syncing') si.innerHTML='<span class="sync-dot" style="background:#60A5FA"></span> กำลัง Sync...';
-  else if(state==='synced')  si.innerHTML='<span class="sync-dot"></span> Synced · ทีมเห็นข้อมูลเดียวกัน';
-  else if(state==='offline') si.innerHTML='<span class="sync-dot" style="background:#F87171;animation:none"></span> Offline · บันทึกเฉพาะเครื่อง';
-  else if(state==='loading') si.innerHTML='<span class="sync-dot" style="background:#60A5FA"></span> กำลังโหลด...';
+  if(state==='syncing'||state==='loading') _syncBusy=true;
+  else if(state==='synced'||state==='offline') _syncBusy=false;
+  var btn = '<button class="sync-btn'+(_syncBusy?' spinning':'')+'" id="sync-btn" onclick="manualSync()" title="Sync ใหม่"'+(_syncBusy?' disabled':'')+'>↻</button>';
+  if(state==='saving')   si.innerHTML='<span class="sync-dot" style="background:#FBB040"></span> กำลังบันทึก...'+btn;
+  else if(state==='syncing'||state==='loading') si.innerHTML='<span class="sync-dot" style="background:#60A5FA"></span> กำลัง Sync...'+btn;
+  else if(state==='synced')  si.innerHTML='<span class="sync-dot"></span> Synced · ทีมเห็นข้อมูลเดียวกัน'+btn;
+  else if(state==='offline') si.innerHTML='<span class="sync-dot" style="background:#F87171;animation:none"></span> Offline · กด ↻ เพื่อลองใหม่'+btn;
 }
+
+function manualSync(){
+  if(_syncBusy) return;
+  loadFromGAS();
+}
+
+// Auto-poll ทุก 30 วินาที
+setInterval(function(){ if(!_syncBusy) loadFromGAS(); }, 30000);
 
 /* ═══ STORAGE ═══ */
 function saveToStorage(){
