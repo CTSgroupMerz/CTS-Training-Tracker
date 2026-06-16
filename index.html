@@ -317,17 +317,19 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 .ub-umeta{font-size:11px;color:var(--ink3);margin-top:1px}
 
 /* ── MOBILE TOP BAR ── */
+/* Mobile top bar — shown in detail view only */
 #mob-top-bar{
-  display:none;position:fixed;top:0;left:0;right:0;height:52px;z-index:60;
+  display:none;position:sticky;top:0;z-index:30;
   background:var(--white);border-bottom:1.5px solid var(--border);
-  align-items:center;padding:0 16px;gap:12px;
+  align-items:center;padding:0 16px;height:52px;gap:10px;
 }
 .mob-back-link{
-  background:none;border:none;font-size:15px;font-weight:700;color:var(--blue);
-  font-family:'Sarabun',sans-serif;cursor:pointer;padding:8px 4px;flex-shrink:0;
+  background:none;border:none;font-size:22px;color:var(--ink2);
+  font-family:'Sarabun',sans-serif;cursor:pointer;padding:8px 4px;
+  flex-shrink:0;line-height:1;display:flex;align-items:center;
 }
 #mob-clinic-title{
-  font-size:14px;font-weight:600;color:var(--ink);
+  font-size:14px;font-weight:700;color:var(--ink);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
 }
 
@@ -349,7 +351,7 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
   .cb-meta{font-size:10px}
 
   /* Main = detail screen */
-  .main{display:none;padding:68px 16px 100px}
+  .main{display:none;padding:0 16px 100px}
   .main.mob-visible{display:block}
 
   /* Clinic header compact */
@@ -654,6 +656,7 @@ function loadFromGAS(cb){
     clearTimeout(_timer);
     var localTs=parseInt(localStorage.getItem(STORAGE_KEY+'_ts')||0);
     var gasTs=parseInt(res.ts||0);
+    var ok=false;
     if(gasTs>localTs && res.data){
       try{
         var parsed=JSON.parse(res.data);
@@ -661,9 +664,11 @@ function loadFromGAS(cb){
           clinics=parsed; _migrateClinics();
           localStorage.setItem(STORAGE_KEY,res.data);
           localStorage.setItem(STORAGE_KEY+'_ts',gasTs);
+          ok=true;
         }
       }catch(ex){ console.log('GAS parse error',ex); }
     }
+    if(!ok) _loadFromLocal(); // always ensure clinics populated
     showSyncStatus('synced');
     _finish(true);
   })
@@ -1121,18 +1126,15 @@ function removePdf(cid, i){
 function selectClinic(id){
   activeId=id;renderSidebar();
   var c=clinics.find(function(x){return x.id===id});
-  if(c){
-    renderClinic(c);
-    if(isMob()){
-      var t=document.getElementById('mob-clinic-title');
-      if(t) t.textContent=c.name;
-      hideMobSidebar();
-    }
-  }
+  if(c){ renderClinic(c); if(isMob()) hideMobSidebar(); }
 }
 
 function renderClinic(c){
   var main=document.getElementById('main');
+  // inject mobile top bar at start of main on mobile
+  var mobBar = isMob()
+    ? '<div id="mob-top-bar" style="display:flex"><button class="mob-back-link" onclick="showMobSidebar()">&#8249;</button><span id="mob-clinic-title">'+c.name+'</span></div>'
+    : '';
   if(!c.sdefs) c.sdefs=buildSessions(c.pkg,c.numSess);
   var sdefs=c.sdefs;
   var sc=calcScore(c),res=resultInfo(sc.total);
@@ -1353,7 +1355,7 @@ function renderClinic(c){
   <div class="action-box ${res.ab}" id="action-result"><strong>${res.icon} ${res.label}</strong> — ${res.action}</div>`;
 
   var pkgLbl=c.pkg==='E'?'MAX-Entry':c.pkg==='A'?'MAX-A':'MAX-B';
-  main.innerHTML=`
+  main.innerHTML=mobBar+`
     <div class="clinic-header">
       <div>
         <div class="ch-breadcrumb">${createdInfo}</div>
@@ -1587,7 +1589,6 @@ function isMob(){ return window.innerWidth <= 767; }
 function showMobSidebar(){
   document.querySelector('.sidebar').classList.remove('mob-hidden');
   document.querySelector('.main').classList.remove('mob-visible');
-  document.getElementById('mob-top-bar').style.display='none';
   window.scrollTo(0,0);
 }
 
@@ -1595,7 +1596,6 @@ function hideMobSidebar(){
   if(!isMob()) return;
   document.querySelector('.sidebar').classList.add('mob-hidden');
   document.querySelector('.main').classList.add('mob-visible');
-  document.getElementById('mob-top-bar').style.display='flex';
   window.scrollTo(0,0);
 }
 
@@ -1603,7 +1603,6 @@ window.addEventListener('resize', function(){
   if(!isMob()){
     document.querySelector('.sidebar').classList.remove('mob-hidden');
     document.querySelector('.main').classList.remove('mob-visible');
-    document.getElementById('mob-top-bar').style.display='none';
   }
 });
 
@@ -1615,9 +1614,5 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<div id="mob-top-bar">
-  <button class="mob-back-link" onclick="showMobSidebar()">← รายการ</button>
-  <span id="mob-clinic-title"></span>
-</div>
 </body>
 </html>
