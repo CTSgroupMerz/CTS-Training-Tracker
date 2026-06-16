@@ -316,47 +316,61 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 .ub-uname{font-size:13px;font-weight:600;color:var(--ink)}
 .ub-umeta{font-size:11px;color:var(--ink3);margin-top:1px}
 
-/* ── MOBILE BACK BUTTON (hidden on desktop) ── */
-.mob-back-btn{
-  display:none;position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-  background:var(--blue);color:white;border:none;border-radius:25px;
-  padding:13px 28px;font-size:14px;font-weight:700;font-family:'Sarabun',sans-serif;
-  cursor:pointer;z-index:60;box-shadow:0 4px 20px rgba(26,95,168,.45);
-  align-items:center;gap:8px;white-space:nowrap;
+/* ── MOBILE TOP BAR ── */
+#mob-top-bar{
+  display:none;position:fixed;top:0;left:0;right:0;height:52px;z-index:60;
+  background:var(--white);border-bottom:1.5px solid var(--border);
+  align-items:center;padding:0 16px;gap:12px;
+}
+.mob-back-link{
+  background:none;border:none;font-size:15px;font-weight:700;color:var(--blue);
+  font-family:'Sarabun',sans-serif;cursor:pointer;padding:8px 4px;flex-shrink:0;
+}
+#mob-clinic-title{
+  font-size:14px;font-weight:600;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;
 }
 
 @media(max-width:767px){
-  /* Stack layout — sidebar overlays full screen */
+  /* Block layout — sidebar OR main, never both */
   .app{display:block}
+
+  /* Sidebar = list screen (full viewport, scrollable) */
   .sidebar{
-    position:fixed;inset:0;z-index:50;
-    height:100dvh;max-height:none;
-    transform:translateX(0);
-    transition:transform .25s cubic-bezier(.4,0,.2,1);
+    display:flex;position:static;height:100dvh;max-height:none;
+    overflow-y:scroll;-webkit-overflow-scrolling:touch;
   }
-  .sidebar.mob-hidden{transform:translateX(-100%)}
+  .sidebar.mob-hidden{display:none !important}
 
-  /* Main content full width */
-  .main{padding:16px 16px 100px;min-height:100vh}
+  /* Bigger tap targets in list */
+  .clinic-btn{padding:14px 12px;min-height:64px}
+  .cb-avatar{width:40px;height:40px;font-size:18px;border-radius:10px}
+  .cb-name{font-size:14px}
+  .cb-meta{font-size:10px}
 
-  /* Clinic header — wrap score circle below name on narrow screens */
-  .clinic-header{flex-wrap:wrap}
-  .ch-right{width:100%;display:flex;align-items:center;gap:16px;justify-content:flex-start;margin-top:4px}
-  .score-circle{width:60px;height:60px}
-  .sc-num{font-size:20px}
+  /* Main = detail screen */
+  .main{display:none;padding:68px 16px 100px}
+  .main.mob-visible{display:block}
 
-  /* Overview grid 2 cols on mobile */
+  /* Clinic header compact */
+  .clinic-header{flex-wrap:wrap;padding:14px 16px;border-radius:0;border-left:none;border-right:none;margin-bottom:12px}
+  .ch-right{width:100%;display:flex;align-items:center;gap:14px;margin-top:8px}
+  .score-circle{width:56px;height:56px;border-width:3px}
+  .sc-num{font-size:18px}
+
+  /* Overview grid 2 cols */
   .ov-grid{grid-template-columns:repeat(2,1fr)}
 
-  /* Smaller score buttons */
+  /* Score buttons */
   .score-btns{gap:2px}
-  .sb-btn{width:23px;height:23px;font-size:10px}
+  .sb-btn{width:26px;height:26px;font-size:10px}
 
-  /* Session cards full width */
+  /* Session cards */
   .sess-card{margin-bottom:10px}
+  .sess-body{padding:10px 12px}
 
-  /* Back button visible on mobile */
-  .mob-back-btn{display:flex !important}
+  /* Add button */
+  .add-btn{margin:12px 8px 12px;width:calc(100% - 16px)}
 }
 </style>
 </head>
@@ -624,32 +638,36 @@ function _syncToGAS(ts){
   .catch(function(){ showSyncStatus('offline'); });
 }
 
-function loadFromGAS(){
-  if(!GAS_URL){ _loadFromLocal(); return; }
+function loadFromGAS(cb){
+  if(!GAS_URL){ _loadFromLocal(); if(cb) cb(); return; }
   showSyncStatus('loading');
+  var _done=false;
+  function _finish(ok){
+    if(_done) return; _done=true;
+    if(!ok) _loadFromLocal();
+    if(cb) cb();
+  }
+  var _timer=setTimeout(function(){ showSyncStatus('offline'); _finish(false); }, 6000);
   fetch(GAS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
   .then(function(res){
-    var localTs = parseInt(localStorage.getItem(STORAGE_KEY+'_ts')||0);
-    var gasTs   = parseInt(res.ts||0);
-    if(gasTs > localTs && res.data){
+    clearTimeout(_timer);
+    var localTs=parseInt(localStorage.getItem(STORAGE_KEY+'_ts')||0);
+    var gasTs=parseInt(res.ts||0);
+    if(gasTs>localTs && res.data){
       try{
-        var parsed = JSON.parse(res.data);
+        var parsed=JSON.parse(res.data);
         if(Array.isArray(parsed)){
-          clinics = parsed;
-          _migrateClinics();
-          localStorage.setItem(STORAGE_KEY, res.data);
-          localStorage.setItem(STORAGE_KEY+'_ts', gasTs);
-          renderSidebar();
-          if(activeId){ var c=clinics.find(function(x){return x.id===activeId}); if(c) selectClinic(activeId); }
+          clinics=parsed; _migrateClinics();
+          localStorage.setItem(STORAGE_KEY,res.data);
+          localStorage.setItem(STORAGE_KEY+'_ts',gasTs);
         }
       }catch(ex){ console.log('GAS parse error',ex); }
-    } else {
-      _loadFromLocal();
     }
     showSyncStatus('synced');
+    _finish(true);
   })
-  .catch(function(){ _loadFromLocal(); showSyncStatus('offline'); });
+  .catch(function(){ clearTimeout(_timer); showSyncStatus('offline'); _finish(false); });
 }
 
 function _migrateClinics(){
@@ -1100,7 +1118,18 @@ function removePdf(cid, i){
 }
 
 /* ═══ RENDER CLINIC ═══ */
-function selectClinic(id){activeId=id;renderSidebar();var c=clinics.find(function(x){return x.id===id});if(c){renderClinic(c);hideMobSidebar();}}
+function selectClinic(id){
+  activeId=id;renderSidebar();
+  var c=clinics.find(function(x){return x.id===id});
+  if(c){
+    renderClinic(c);
+    if(isMob()){
+      var t=document.getElementById('mob-clinic-title');
+      if(t) t.textContent=c.name;
+      hideMobSidebar();
+    }
+  }
+}
 
 function renderClinic(c){
   var main=document.getElementById('main');
@@ -1528,22 +1557,16 @@ document.getElementById('today-date').textContent='วัน'+thDays[now.getDay(
 /* ═══ INIT ═══ */
 function init(){
   document.getElementById('ls-text').textContent='กำลังโหลดข้อมูล...';
-  loadFromGAS();
 
-  // restore user
   var savedId=loadUserPref();
-  if(savedId){
-    var u=TEAM.find(function(x){return x.id===savedId});
-    if(u) setUser(u);
-  }
+  if(savedId){ var u=TEAM.find(function(x){return x.id===savedId}); if(u) setUser(u); }
 
-  document.getElementById('loading-screen').classList.add('hidden');
-  document.getElementById('app').style.display='grid';
-  renderSidebar();
-
-  if(!currentUser){
-    setTimeout(openUserModal, 400);
-  }
+  loadFromGAS(function(){
+    document.getElementById('loading-screen').classList.add('hidden');
+    document.getElementById('app').style.display = isMob() ? 'block' : 'grid';
+    renderSidebar();
+    if(!currentUser) setTimeout(openUserModal, 400);
+  });
 
   // sync across tabs — when another tab saves, reload local copy
   window.addEventListener('storage', function(e){
@@ -1563,22 +1586,24 @@ function isMob(){ return window.innerWidth <= 767; }
 
 function showMobSidebar(){
   document.querySelector('.sidebar').classList.remove('mob-hidden');
-  var btn = document.getElementById('mob-back');
-  if(btn) btn.style.display = 'none';
+  document.querySelector('.main').classList.remove('mob-visible');
+  document.getElementById('mob-top-bar').style.display='none';
+  window.scrollTo(0,0);
 }
 
 function hideMobSidebar(){
   if(!isMob()) return;
   document.querySelector('.sidebar').classList.add('mob-hidden');
-  var btn = document.getElementById('mob-back');
-  if(btn) btn.style.display = 'flex';
+  document.querySelector('.main').classList.add('mob-visible');
+  document.getElementById('mob-top-bar').style.display='flex';
+  window.scrollTo(0,0);
 }
 
 window.addEventListener('resize', function(){
   if(!isMob()){
     document.querySelector('.sidebar').classList.remove('mob-hidden');
-    var btn = document.getElementById('mob-back');
-    if(btn) btn.style.display = 'none';
+    document.querySelector('.main').classList.remove('mob-visible');
+    document.getElementById('mob-top-bar').style.display='none';
   }
 });
 
@@ -1590,6 +1615,9 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
-<button class="mob-back-btn" id="mob-back" onclick="showMobSidebar()">← รายการคลินิก</button>
+<div id="mob-top-bar">
+  <button class="mob-back-link" onclick="showMobSidebar()">← รายการ</button>
+  <span id="mob-clinic-title"></span>
+</div>
 </body>
 </html>
