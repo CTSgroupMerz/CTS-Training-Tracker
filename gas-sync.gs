@@ -1,35 +1,18 @@
 // ════════════════════════════════════════════════
 //  CTS Training Tracker — GAS Sync Backend
 //  วิธีใช้:
-//  1. สร้าง Google Sheets ใหม่
-//  2. ก็อป Spreadsheet ID จาก URL แล้วใส่ด้านล่าง
-//  3. Deploy > New deployment > Web App
-//     Execute as: Me | Who has access: Anyone
-//  4. ก็อป URL ไปใส่ใน index.html บรรทัด GAS_URL
+//  1. เปิด Google Apps Script ที่ deploy ไว้
+//  2. แทนที่ code ทั้งหมดด้วยไฟล์นี้
+//  3. กด Deploy > Manage deployments > Edit (ดินสอ)
+//     > Version: New version > Deploy
+//  ไม่ต้องเปลี่ยน URL — URL เดิมใช้ได้ต่อ
 // ════════════════════════════════════════════════
 
-var SPREADSHEET_ID = ''; // ← ใส่ Spreadsheet ID ที่นี่
+var SPREADSHEET_ID = '1u53rZoP87tO2CiZTD7WugV2SE2zpQn7itPZivnddmUQ';
 var SHEET_NAME = 'ClinicsData';
 
 function doGet(e) {
-  try {
-    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-    var sh = ss.getSheetByName(SHEET_NAME);
-    if (!sh) {
-      return ContentService
-        .createTextOutput(JSON.stringify({ data: '[]', ts: 0 }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-    var data = sh.getRange('A1').getValue() || '[]';
-    var ts   = sh.getRange('B1').getValue() || 0;
-    return ContentService
-      .createTextOutput(JSON.stringify({ data: String(data), ts: Number(ts) }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ error: err.message, data: '[]', ts: 0 }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+  return _load();
 }
 
 function doPost(e) {
@@ -49,6 +32,27 @@ function doPost(e) {
   } catch (err) {
     return ContentService
       .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function _load() {
+  try {
+    var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sh = ss.getSheetByName(SHEET_NAME);
+    if (!sh) {
+      return ContentService
+        .createTextOutput(JSON.stringify({ data: '[]', ts: 0 }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+    var data = sh.getRange('A1').getValue() || '[]';
+    var ts   = sh.getRange('B1').getValue() || 0;
+    return ContentService
+      .createTextOutput(JSON.stringify({ data: String(data), ts: Number(ts) }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ error: err.message, data: '[]', ts: 0 }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
