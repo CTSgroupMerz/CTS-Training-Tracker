@@ -20,12 +20,18 @@ function doGet(e) {
 function doPost(e) {
   try {
     var body;
-    if (e.postData && e.postData.contents) {
-      body = JSON.parse(e.postData.contents);
-    } else if (e.parameter && e.parameter.payload) {
+    // ตรวจ e.parameter.payload ก่อน (form POST ส่งมาแบบนี้)
+    if (e.parameter && e.parameter.payload) {
       body = JSON.parse(e.parameter.payload);
+    } else if (e.postData && e.postData.contents) {
+      // fetch POST ที่ส่ง JSON ตรงๆ (เช่น upload)
+      body = JSON.parse(e.postData.contents);
     } else {
-      throw new Error('No payload');
+      throw new Error('No payload found in request (postData and parameter both empty)');
+    }
+
+    if (!body || typeof body !== 'object') {
+      throw new Error('Payload parsed but is not a valid object: ' + typeof body);
     }
 
     if (body.action === 'upload') {
@@ -55,10 +61,19 @@ function _saveData(body) {
 
 // ── อัปโหลดไฟล์ขึ้น Google Drive แยกโฟลเดอร์ตามเดือน
 function _uploadToDrive(body) {
-  var fileName  = body.fileName;
-  var base64    = body.fileData;
-  var mimeType  = body.mimeType || 'application/pdf';
-  var monthLabel = body.month;   // เช่น "มิ.ย. 2569"
+  if (!body || !body.fileName || !body.fileData) {
+    return ContentService
+      .createTextOutput(JSON.stringify({
+        status: 'error',
+        message: 'ข้อมูลไม่ครบ — ต้องการ: fileName, fileData (และ mimeType, month)'
+      }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var fileName   = body.fileName;
+  var base64     = body.fileData;
+  var mimeType   = body.mimeType || 'application/pdf';
+  var monthLabel = body.month || 'ไม่ระบุเดือน';
 
   // โฟลเดอร์หลัก
   var rootFolders = DriveApp.getFoldersByName(DRIVE_FOLDER);
