@@ -571,12 +571,24 @@ function saveToStorage(){
 function _syncToGAS(ts){
   if(!GAS_URL){ showSyncStatus('synced'); return; }
   showSyncStatus('syncing');
-  fetch(GAS_URL, {
-    method:'POST', mode:'no-cors',
-    headers:{'Content-Type':'text/plain'},
-    body: JSON.stringify({data: JSON.stringify(clinics), ts: ts, user: currentUser?currentUser.name:'unknown'})
-  }).then(function(){ showSyncStatus('synced'); })
-  .catch(function(){ showSyncStatus('offline'); });
+  // Strip pdfFiles before sync (too large for URL params, stays local only)
+  var syncable = clinics.map(function(c){
+    var cp = JSON.parse(JSON.stringify(c));
+    if(cp.pdfFiles) cp.pdfFiles = cp.pdfFiles.map(function(){ return null; });
+    return cp;
+  });
+  var payload = encodeURIComponent(JSON.stringify({
+    data: JSON.stringify(syncable),
+    ts: ts,
+    user: currentUser ? currentUser.name : 'unknown'
+  }));
+  fetch(GAS_URL + '?action=save&payload=' + payload)
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(res.status==='ok') showSyncStatus('synced');
+    else { console.log('GAS save error:', res); showSyncStatus('offline'); }
+  })
+  .catch(function(e){ console.log('Sync error:', e); showSyncStatus('offline'); });
 }
 
 function loadFromGAS(){
