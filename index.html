@@ -1165,11 +1165,11 @@ function buildHandSkillHTML(c, i){
     // ไฟล์ใน Google Drive — ทีมเห็นทุกคน
     var who = pf.uploadedBy ? ' · '+pf.uploadedBy : '';
     pdfHTML = `<div class="pdf-attached">
-      <span style="font-size:16px">📄</span>
+      <span style="font-size:15px">✅</span>
       <span class="pdf-name" title="${pf.name}">${pf.name}</span>
       <span class="pdf-drive-badge">DRIVE</span>
       <span class="pdf-size">${pf.size||''}${who}</span>
-      <a class="pdf-view-btn" href="${pf.url}" target="_blank" rel="noopener">เปิด</a>
+      <a class="pdf-view-btn" href="${pf.url}" target="_blank" rel="noopener">เปิดใน Drive ↗</a>
       <button class="pdf-remove" onclick="removePdf('${c.id}',${i})" title="ลบไฟล์">×</button>
     </div>`;
   } else if(pf && pf.dataUrl){
@@ -1250,19 +1250,25 @@ function handlePdfUpload(evt, cid, i){
     })
     .then(function(r){return r.json();})
     .then(function(res){
+      // re-lookup จาก clinics ปัจจุบัน (ป้องกัน stale reference ถ้า auto-sync วิ่งระหว่างอัปโหลด)
+      var cur = clinics.find(function(x){return x.id===cid;})||c;
+      var w = document.getElementById('skill-wrap-'+cid+'-'+i);
       if(res.status==='ok'){
-        c.pdfFiles[i]={name:file.name,size:sizeStr,url:res.url,uploadedBy:currentUser?currentUser.name:'unknown'};
+        if(!cur.pdfFiles) cur.pdfFiles=[];
+        cur.pdfFiles[i]={name:file.name,size:sizeStr,url:res.url,uploadedBy:currentUser?currentUser.name:'unknown'};
         markEdit(cid);
-        if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+        if(w) w.innerHTML=buildHandSkillHTML(cur,i).match(/<div class="skill-section"[\s\S]*/)[0];
         saveToStorage();
       } else {
         alert('อัปโหลดไม่สำเร็จ: '+(res.message||'unknown error'));
-        if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+        if(w) w.innerHTML=buildHandSkillHTML(cur,i).match(/<div class="skill-section"[\s\S]*/)[0];
       }
     })
     .catch(function(err){
       alert('เชื่อมต่อ GAS ไม่ได้: '+err.message);
-      if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i).match(/<div class="skill-section"[\s\S]*/)[0];
+      var cur=clinics.find(function(x){return x.id===cid;})||c;
+      var w=document.getElementById('skill-wrap-'+cid+'-'+i);
+      if(w) w.innerHTML=buildHandSkillHTML(cur,i).match(/<div class="skill-section"[\s\S]*/)[0];
     });
   };
   reader.readAsDataURL(file);
