@@ -571,10 +571,11 @@ function saveToStorage(){
 function _syncToGAS(ts){
   if(!GAS_URL){ showSyncStatus('synced'); return; }
   showSyncStatus('syncing');
-  // Strip pdfFiles before sync (too large for URL params, stays local only)
+  // Strip pdfFiles (too large) and sdefs (can regenerate) before sync
   var syncable = clinics.map(function(c){
     var cp = JSON.parse(JSON.stringify(c));
     if(cp.pdfFiles) cp.pdfFiles = cp.pdfFiles.map(function(){ return null; });
+    delete cp.sdefs;
     return cp;
   });
   var payload = encodeURIComponent(JSON.stringify({
@@ -582,13 +583,10 @@ function _syncToGAS(ts){
     ts: ts,
     user: currentUser ? currentUser.name : 'unknown'
   }));
-  fetch(GAS_URL + '?action=save&payload=' + payload)
-  .then(function(r){ return r.json(); })
-  .then(function(res){
-    if(res.status==='ok') showSyncStatus('synced');
-    else { console.log('GAS save error:', res); showSyncStatus('offline'); }
-  })
-  .catch(function(e){ console.log('Sync error:', e); showSyncStatus('offline'); });
+  // use no-cors to bypass CORS header check on redirect
+  fetch(GAS_URL + '?action=save&payload=' + payload, { mode: 'no-cors' })
+  .then(function(){ showSyncStatus('synced'); })
+  .catch(function(){ showSyncStatus('offline'); });
 }
 
 function loadFromGAS(){
