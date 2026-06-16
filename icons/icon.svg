@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#111110"/>
+  <!-- Medical cross -->
+  <rect x="208" y="136" width="96" height="240" rx="18" fill="#4ADE80"/>
+  <rect x="136" y="208" width="240" height="96" rx="18" fill="#4ADE80"/>
+  <!-- Data lines suggesting tracking -->
+  <rect x="152" y="368" width="208" height="7" rx="3.5" fill="rgba(255,255,255,0.18)"/>
+  <rect x="152" y="383" width="152" height="7" rx="3.5" fill="rgba(255,255,255,0.11)"/>
+</svg>

@@ -1,0 +1,1525 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CTS Training Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#111110">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CTS Tracker">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root {
+  --ink:#1A1A18;--ink2:#5C5C58;--ink3:#9C9A92;--ink4:#C8C6BE;
+  --paper:#F7F6F2;--surface:#FAFAF8;--white:#fff;--border:#E5E3DB;--border2:#D0CEC4;
+  --blue:#1A5FA8;--blue-l:#EAF3FC;--blue-p:#F4F9FE;
+  --teal:#0B6B52;--teal-l:#E5F5EE;--teal-p:#F2FAF6;
+  --amber:#B85C00;--amber-l:#FEF0DC;
+  --green:#1A7A3C;--green-l:#E6F5EC;
+  --red:#C0392B;--red-l:#FDECEA;
+  --purple:#4A3DB5;--purple-l:#EDEBFB;
+  --orange:#C05000;--orange-l:#FFF0E0;
+  --entry:#6B3FB5;--entry-l:#F0EAFF;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Sarabun',sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.6;min-height:100vh}
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+
+/* LOADING SCREEN */
+.loading-screen{position:fixed;inset:0;background:#111110;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .4s}
+.loading-screen.hidden{opacity:0;pointer-events:none}
+.ls-logo{font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.4);font-family:'DM Mono',monospace;margin-bottom:16px}
+.ls-spinner{width:32px;height:32px;border:2.5px solid rgba(255,255,255,.1);border-top-color:rgba(255,255,255,.6);border-radius:50%;animation:spin .7s linear infinite}
+.ls-text{margin-top:12px;font-size:12px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* USER BANNER */
+.user-banner{background:linear-gradient(135deg,var(--blue) 0%,#0A3E6E 100%);padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-shrink:0}
+.ub-left{display:flex;align-items:center;gap:10px}
+.ub-avatar{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:13px}
+.ub-name{font-size:12px;font-weight:600;color:white}
+.ub-team{font-size:10px;color:rgba(255,255,255,.55);margin-top:1px}
+.ub-right{display:flex;align-items:center;gap:8px}
+.ub-badge{font-size:9px;padding:2px 8px;border-radius:10px;background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase}
+.change-user-btn{font-size:10px;color:rgba(255,255,255,.4);background:none;border:none;cursor:pointer;font-family:'Sarabun',sans-serif;padding:0}
+.change-user-btn:hover{color:rgba(255,255,255,.7)}
+
+/* SIDEBAR */
+.sidebar{background:#111110;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-top{padding:18px 20px 12px}
+.sb-logo{font-size:9px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sb-logo::before{content:'';width:16px;height:1px;background:rgba(255,255,255,.2)}
+.sb-title{font-size:16px;font-weight:700;color:white;line-height:1.25;margin-bottom:4px}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.3);line-height:1.5}
+.sb-sync{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:10px;color:rgba(255,255,255,.3);font-family:'DM Mono',monospace}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4ADE80;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.sb-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
+.stat-box{text-align:center;padding:7px 3px;border-radius:7px;background:rgba(255,255,255,.05)}
+.stat-num{font-family:'DM Mono',monospace;font-size:17px;font-weight:700;line-height:1}
+.stat-label{font-size:8.5px;color:rgba(255,255,255,.3);margin-top:2px;line-height:1.2}
+.sn-white{color:rgba(255,255,255,.8)}.sn-green{color:#4ADE80}.sn-amber{color:#FBB040}.sn-red{color:#F87171}
+.sb-section-label{font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.22);padding:10px 18px 5px;font-family:'DM Mono',monospace}
+.clinic-list{padding:0 8px;flex:1;overflow-y:auto}
+.clinic-btn{width:100%;text-align:left;padding:9px 11px;border-radius:9px;border:none;background:transparent;cursor:pointer;transition:background .12s;color:rgba(255,255,255,.6);font-family:'Sarabun',sans-serif;font-size:13px;display:flex;align-items:center;gap:9px;margin-bottom:2px}
+.clinic-btn:hover{background:rgba(255,255,255,.07);color:white}
+.clinic-btn.active{background:rgba(255,255,255,.12);color:white}
+.cb-avatar{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.cb-info{flex:1;min-width:0}
+.cb-name{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:white}
+.cb-meta{font-size:9.5px;color:rgba(255,255,255,.32);margin-top:1px;display:flex;align-items:center;gap:4px}
+.cb-pkg-tag{font-size:8.5px;padding:1px 5px;border-radius:4px;font-weight:600;font-family:'DM Mono',monospace}
+.tag-e{background:rgba(107,63,181,.5);color:#D4AAFF}
+.tag-a{background:rgba(26,95,168,.4);color:#90C4F8}
+.tag-b{background:rgba(11,107,82,.4);color:#6EDDB5}
+.cb-score{min-width:34px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10.5px;font-weight:600;flex-shrink:0;background:rgba(255,255,255,.08);color:rgba(255,255,255,.45);padding:0 5px}
+.cbs-green{background:rgba(26,122,60,.35);color:#4ADE80}
+.cbs-amber{background:rgba(184,92,0,.35);color:#FBB040}
+.cbs-red{background:rgba(192,57,43,.35);color:#F87171}
+.session-progress{margin-top:3px;height:2px;background:rgba(255,255,255,.08);border-radius:1px;overflow:hidden}
+.sp-fill{height:100%;border-radius:1px;background:rgba(255,255,255,.28);transition:width .3s}
+.add-btn{margin:8px 8px 0;padding:9px 11px;border-radius:9px;border:1.5px dashed rgba(255,255,255,.13);background:transparent;color:rgba(255,255,255,.3);font-family:'Sarabun',sans-serif;font-size:13px;cursor:pointer;width:calc(100% - 16px);text-align:center;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:6px}
+.add-btn:hover{border-color:rgba(255,255,255,.32);color:rgba(255,255,255,.6);background:rgba(255,255,255,.04)}
+.sb-footer{padding:12px 14px;border-top:1px solid rgba(255,255,255,.07);margin-top:auto}
+.sf-date{font-size:9.5px;color:rgba(255,255,255,.22);font-family:'DM Mono',monospace;text-align:center}
+.sf-storage{font-size:9px;color:rgba(255,255,255,.18);text-align:center;margin-top:3px}
+
+/* MAIN */
+.main{padding:24px 24px 80px;overflow-y:auto;min-width:0}
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;text-align:center;gap:10px}
+.es-icon{font-size:48px;opacity:.3}
+.es-title{font-size:17px;font-weight:700;color:var(--ink2)}
+.es-desc{font-size:13px;color:var(--ink3);max-width:280px;line-height:1.7}
+
+/* CLINIC HEADER */
+.clinic-header{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:18px 22px;margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.ch-breadcrumb{font-size:10px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);margin-bottom:5px}
+.ch-name{font-size:22px;font-weight:800;letter-spacing:-.5px;margin-bottom:7px}
+.ch-chips{display:flex;gap:6px;flex-wrap:wrap}
+.ch-chip{font-size:11px;padding:2px 9px;border-radius:5px;border:1px solid var(--border);color:var(--ink2);background:var(--paper)}
+.chip-e{background:var(--entry-l);color:var(--entry);border-color:#C5AAEE}
+.chip-a{background:var(--blue-l);color:var(--blue);border-color:#C0DCFB}
+.chip-b{background:var(--teal-l);color:var(--teal);border-color:#9FE1CB}
+.chip-std{background:var(--purple-l);color:var(--purple);border-color:#C5BFF5}
+.chip-adv{background:var(--amber-l);color:var(--amber);border-color:#F5C98A}
+.ch-right{text-align:center;flex-shrink:0}
+.score-circle{width:84px;height:84px;border-radius:50%;border:4px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 5px}
+.sc-num{font-family:'DM Mono',monospace;font-size:26px;font-weight:800;line-height:1}
+.sc-label{font-size:9px;color:var(--ink3)}
+.result-badge{display:inline-block;font-size:10.5px;font-weight:600;padding:3px 11px;border-radius:20px}
+.rb-green{background:var(--green-l);color:var(--green)}
+.rb-amber{background:var(--amber-l);color:var(--amber)}
+.rb-red{background:var(--red-l);color:var(--red)}
+.rb-gray{background:var(--paper);color:var(--ink3);border:1px solid var(--border)}
+
+/* OVERVIEW */
+.ov-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:16px}
+.ov-card{background:var(--white);border:1.5px solid var(--border);border-radius:11px;padding:12px 14px;text-align:center}
+.ov-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:700;line-height:1;margin-bottom:3px}
+.ov-lbl{font-size:10.5px;color:var(--ink3);line-height:1.3}
+
+.sec-lbl{font-size:9.5px;font-weight:600;color:var(--ink3);text-transform:uppercase;letter-spacing:.1em;font-family:'DM Mono',monospace;border-bottom:1px solid var(--border);padding-bottom:7px;margin:20px 0 12px}
+
+/* SESSION CARDS */
+.sess-card{background:var(--white);border:1.5px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:9px;transition:border-color .15s}
+.sess-card:hover{border-color:var(--border2)}
+.sess-head{padding:12px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;background:var(--surface);user-select:none}
+.sess-num{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:700;flex-shrink:0;font-family:'DM Mono',monospace}
+.sn1{background:var(--blue-l);color:var(--blue)}.sn2{background:var(--purple-l);color:var(--purple)}
+.sn3{background:var(--orange-l);color:var(--orange)}.sn4{background:var(--teal-l);color:var(--teal)}.snE{background:var(--entry-l);color:var(--entry)}
+.sess-info{flex:1}
+.sess-title{font-size:12.5px;font-weight:700}
+.sess-sub{font-size:10.5px;color:var(--ink3);margin-top:1px}
+.sess-date-chip{font-size:9.5px;padding:2px 7px;border-radius:4px;background:var(--paper);border:1px solid var(--border);color:var(--ink3);font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0}
+.sess-check{width:24px;height:24px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;transition:all .15s;flex-shrink:0;color:transparent}
+.sess-check:hover{border-color:var(--green)}
+.sess-check.done{background:var(--green);border-color:var(--green);color:white}
+.sess-chevron{font-size:10px;color:var(--ink4);transition:transform .2s;flex-shrink:0;margin-left:3px}
+.sess-head.open .sess-chevron{transform:rotate(180deg)}
+.sess-body{display:none;padding:14px 14px 16px;border-top:1px solid var(--border)}
+.sess-body.open{display:block;animation:fadeIn .15s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+
+/* METRIC */
+.m-group-title{font-size:9.5px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-family:'DM Mono',monospace;margin-bottom:8px}
+.m-row{display:flex;align-items:center;gap:11px;padding:8px 0;border-bottom:1px solid var(--border)}
+.m-row:last-child{border-bottom:none}
+.m-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.m-info{flex:1}
+.m-name{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:1px}
+.m-how{font-size:10.5px;color:var(--ink3);line-height:1.4}
+.m-input-area{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.score-btns{display:flex;gap:3px;flex-wrap:wrap}
+.sb-btn{width:26px;height:26px;border-radius:5px;border:1.5px solid var(--border);background:var(--paper);font-family:'DM Mono',monospace;font-size:10.5px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--ink3);display:flex;align-items:center;justify-content:center}
+.sb-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.sb-btn.sel-pre{background:var(--blue);border-color:var(--blue);color:white}
+.sb-btn.sel-post{background:var(--green);border-color:var(--green);color:white}
+
+/* DATE INPUT */
+input[type=text].date-in{border:1.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink);background:var(--paper);outline:none;padding:5px 9px;transition:border-color .15s;width:125px}
+input[type=text].date-in:focus{border-color:var(--blue);background:white}
+
+/* QR */
+.qr-section{background:var(--paper);border-radius:9px;padding:11px 13px;border:1px solid var(--border)}
+.qr-top{display:flex;align-items:flex-start;gap:12px}
+.qr-box{background:white;border-radius:7px;padding:5px;border:1px solid var(--border);flex-shrink:0}
+.qr-info{flex:1}
+.qr-title{font-size:11.5px;font-weight:700;margin-bottom:2px}
+.qr-desc{font-size:10.5px;color:var(--ink3);line-height:1.4;margin-bottom:7px}
+.star-row{display:flex;gap:5px;align-items:center}
+.star-btn{font-size:21px;cursor:pointer;transition:transform .1s;line-height:1;background:none;border:none;padding:0}
+.star-btn:hover{transform:scale(1.2)}
+.star-avg{font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--amber);margin-left:5px}
+.star-count{font-size:10.5px;color:var(--ink3);margin-left:4px}
+
+input[type=text].note-in{width:100%;border:1.5px solid var(--border);border-radius:6px;font-family:'Sarabun',sans-serif;font-size:12.5px;color:var(--ink);background:var(--paper);outline:none;padding:6px 9px;transition:border-color .15s}
+input[type=text].note-in:focus{border-color:var(--blue);background:white}
+input[type=number].num-in{width:55px;height:28px;border:1.5px solid var(--border);border-radius:6px;font-family:'DM Mono',monospace;font-size:12.5px;text-align:center;color:var(--ink);background:var(--paper);outline:none;transition:border-color .15s}
+input[type=number].num-in:focus{border-color:var(--blue);background:white}
+select.sel-in{border:1.5px solid var(--border);border-radius:6px;font-family:'Sarabun',sans-serif;font-size:11.5px;color:var(--ink);background:var(--paper);outline:none;padding:4px 7px;cursor:pointer}
+select.sel-in:focus{border-color:var(--blue);background:white}
+
+.delta-badge{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:5px}
+.delta-pos{background:var(--green-l);color:var(--green)}.delta-neg{background:var(--red-l);color:var(--red)}.delta-zero{background:var(--paper);color:var(--ink3);border:1px solid var(--border)}
+
+/* DOCTOR ASSESSMENT TABLE */
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:10px;font-size:12px}
+.doc-table th{font-size:9.5px;font-weight:600;color:var(--ink3);text-align:left;padding:5px 8px;border-bottom:1px solid var(--border);background:var(--paper);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace}
+.doc-table td{padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.doc-table tr:last-child td{border-bottom:none}
+.doc-table tr:hover td{background:var(--paper)}
+.doc-name-in{border:1.5px solid var(--border);border-radius:6px;font-family:'Sarabun',sans-serif;font-size:12px;color:var(--ink);background:var(--paper);outline:none;padding:4px 8px;width:120px;transition:border-color .15s}
+.doc-name-in:focus{border-color:var(--blue);background:white}
+.score-row-btns{display:flex;gap:2px;flex-wrap:wrap}
+.score-row-btns .sb-btn{width:22px;height:22px;font-size:9.5px}
+.doc-delta{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap}
+.add-doc-btn{border:1.5px dashed var(--border2);background:transparent;border-radius:7px;padding:5px 12px;font-family:'Sarabun',sans-serif;font-size:12px;color:var(--ink3);cursor:pointer;transition:all .12s;width:100%;margin-top:6px}
+.add-doc-btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.doc-avg-row{background:var(--paper);font-weight:600}
+.doc-avg-row td{padding:5px 8px;font-size:11px}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;gap:4px;padding:8px 10px 6px;border-bottom:1px solid rgba(255,255,255,.07)}
+.filter-tab{flex:1;padding:5px 6px;border-radius:6px;border:none;background:transparent;font-family:'Sarabun',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;color:rgba(255,255,255,.35);text-align:center;line-height:1.3}
+.filter-tab:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.65)}
+.filter-tab.active{background:rgba(255,255,255,.14);color:white}
+.filter-tab .ft-count{display:block;font-family:'DM Mono',monospace;font-size:14px;font-weight:700;line-height:1;margin-bottom:2px}
+
+/* HAND SKILL ASSESSMENT */
+.skill-section{background:var(--purple-l);border:1px solid #C5BFF5;border-radius:9px;padding:12px 14px;margin-top:11px}
+.skill-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.skill-badge{font-size:8.5px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--purple);color:white;font-family:'DM Mono',monospace}
+.skill-title{font-size:12px;font-weight:700;color:var(--purple)}
+.skill-btns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px}
+.skill-btn{padding:7px 14px;border-radius:8px;border:1.5px solid #C5BFF5;background:white;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.skill-btn:hover{border-color:var(--purple);color:var(--purple)}
+.skill-btn.sel-pass{background:var(--green);border-color:var(--green);color:white}
+.skill-btn.sel-cond{background:var(--amber);border-color:var(--amber);color:white}
+.skill-btn.sel-retrain{background:var(--red);border-color:var(--red);color:white}
+.skill-result-chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px}
+.src-pass{background:var(--green-l);color:var(--green)}
+.src-cond{background:var(--amber-l);color:var(--amber)}
+.src-retrain{background:var(--red-l);color:var(--red)}
+
+/* PDF UPLOAD */
+.pdf-upload-wrap{margin-top:9px}
+.pdf-upload-label{font-size:10px;font-weight:600;color:var(--purple);text-transform:uppercase;letter-spacing:.07em;font-family:'DM Mono',monospace;margin-bottom:5px;display:block}
+.pdf-drop{border:1.5px dashed #C5BFF5;border-radius:8px;padding:10px 14px;background:rgba(255,255,255,.6);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--ink3)}
+.pdf-drop:hover{border-color:var(--purple);background:white;color:var(--purple)}
+.pdf-drop input[type=file]{position:absolute;opacity:0;pointer-events:none;width:0;height:0}
+.pdf-attached{display:flex;align-items:center;gap:8px;padding:8px 12px;background:white;border-radius:8px;border:1px solid #C5BFF5;font-size:12px}
+.pdf-name{flex:1;color:var(--purple);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
+.pdf-size{font-size:10px;color:var(--ink3);font-family:'DM Mono',monospace;flex-shrink:0}
+.pdf-remove{border:none;background:none;cursor:pointer;color:var(--ink3);font-size:14px;padding:0;flex-shrink:0}
+.pdf-remove:hover{color:var(--red)}
+.pdf-view-btn{font-size:10px;padding:3px 8px;border-radius:5px;background:var(--purple-l);color:var(--purple);border:1px solid #C5BFF5;cursor:pointer;font-family:'Sarabun',sans-serif;flex-shrink:0}
+.pdf-view-btn:hover{background:var(--purple);color:white}
+
+/* D+14 INLINE */
+.d14-inline{background:var(--orange-l);border:1px solid #F5C090;border-radius:9px;padding:11px 13px;margin-top:11px}
+.d14-inline-head{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.d14-inline-badge{font-size:8.5px;font-weight:600;padding:2px 7px;border-radius:20px;background:var(--orange);color:white;font-family:'DM Mono',monospace}
+.d14-inline-title{font-size:11.5px;font-weight:700;color:var(--orange)}
+.d14-row{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid rgba(192,80,0,.15);font-size:11.5px}
+.d14-row:last-child{border-bottom:none}
+.d14-label{flex:1;color:var(--ink2)}
+.d14-note-wrap{flex:1;max-width:190px}
+
+/* POST CARD */
+.post-card{background:var(--white);border:1.5px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:11px}
+.post-head{padding:13px 17px;border-bottom:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:space-between}
+.post-head-left{display:flex;align-items:center;gap:9px}
+.post-icon{font-size:19px}
+.post-title{font-size:13.5px;font-weight:700}
+.post-sub{font-size:10.5px;color:var(--ink3);margin-top:1px}
+.d14-badge-lbl{font-size:9.5px;font-weight:600;padding:2px 9px;border-radius:20px;background:var(--orange-l);color:var(--orange);border:1px solid #F5C090;font-family:'DM Mono',monospace}
+.post-body{padding:13px 17px}
+
+/* SUMMARY */
+.summary-card{background:var(--white);border:1.5px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:11px}
+.summary-head{padding:13px 17px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.summary-title{font-size:13.5px;font-weight:700}
+.summary-body{padding:13px 17px}
+.score-row{display:flex;align-items:center;gap:11px;padding:7px 0;border-bottom:1px solid var(--border)}
+.score-row:last-child{border-bottom:none}
+.sr-label{flex:1;font-size:12px;color:var(--ink2)}
+.sr-bar-wrap{width:85px;height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.sr-bar{height:100%;border-radius:3px;transition:width .4s}
+.sr-pct{font-family:'DM Mono',monospace;font-size:11.5px;font-weight:600;min-width:34px;text-align:right}
+.action-box{border-radius:9px;padding:12px 15px;font-size:12.5px;border:1.5px solid;margin-top:4px;line-height:1.6}
+.ab-green{background:var(--green-l);border-color:#A8E4BD;color:var(--green)}
+.ab-amber{background:var(--amber-l);border-color:#F5C98A;color:var(--amber)}
+.ab-red{background:var(--red-l);border-color:#F0B4AE;color:var(--red)}
+.ab-gray{background:var(--paper);border-color:var(--border);color:var(--ink3)}
+
+/* SAVED BY CHIP */
+.saved-chip{font-size:9px;color:var(--ink4);font-family:'DM Mono',monospace;margin-top:4px;display:flex;align-items:center;gap:4px}
+.saved-chip::before{content:'✓';color:var(--green);font-size:9px}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.overlay.show{opacity:1;pointer-events:all}
+.modal{background:white;border-radius:16px;padding:26px;width:450px;max-width:92vw;transform:translateY(12px);transition:transform .2s;max-height:90vh;overflow-y:auto}
+.overlay.show .modal{transform:translateY(0)}
+.modal-title{font-size:17px;font-weight:800;margin-bottom:3px}
+.modal-sub{font-size:12.5px;color:var(--ink3);margin-bottom:18px}
+.f-label{font-size:11.5px;font-weight:600;color:var(--ink2);margin-bottom:4px;margin-top:14px;display:block}
+.f-label:first-of-type{margin-top:0}
+input[type=text].f-in{width:100%;border:1.5px solid var(--border);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 11px;transition:border-color .15s}
+input[type=text].f-in:focus{border-color:var(--blue);background:white}
+input[type=number].f-in-n{border:1.5px solid var(--border);border-radius:7px;font-family:'DM Mono',monospace;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 11px;width:100%;transition:border-color .15s}
+input[type=number].f-in-n:focus{border-color:var(--blue);background:white}
+select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-family:'Sarabun',sans-serif;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 9px;cursor:pointer}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.modal-btns{display:flex;gap:7px;margin-top:18px;justify-content:flex-end}
+.btn{padding:8px 20px;border-radius:8px;border:1.5px solid;font-family:'Sarabun',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--ink);border-color:var(--ink);color:white}
+.btn-primary:hover{background:#333}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--ink2)}
+.btn-ghost:hover{border-color:var(--ink3);color:var(--ink)}
+.btn-danger{background:transparent;border-color:#F0B4AE;color:var(--red);margin-right:auto}
+.btn-danger:hover{background:var(--red-l)}
+.pkg-note{font-size:10.5px;color:var(--ink3);margin-top:3px;line-height:1.4}
+#m-sess-wrap{display:none}
+
+/* USER SELECT MODAL */
+.user-modal{background:white;border-radius:16px;padding:26px;width:400px;max-width:92vw}
+.user-list{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+.user-btn{padding:11px 16px;border-radius:9px;border:1.5px solid var(--border);background:var(--paper);cursor:pointer;text-align:left;transition:all .15s;font-family:'Sarabun',sans-serif}
+.user-btn:hover{border-color:var(--blue-l);background:var(--blue-l)}
+.user-btn.selected{border-color:var(--blue);background:var(--blue-l)}
+.ub-uname{font-size:13px;font-weight:600;color:var(--ink)}
+.ub-umeta{font-size:11px;color:var(--ink3);margin-top:1px}
+
+@media(max-width:740px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto;max-height:220px}
+  .ov-grid{grid-template-columns:repeat(2,1fr)}
+  .score-btns{gap:2px}
+  .sb-btn{width:23px;height:23px;font-size:10px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-screen" id="loading-screen">
+  <div class="ls-logo">CTS · Clinic Tracker</div>
+  <div class="ls-spinner"></div>
+  <div class="ls-text" id="ls-text">กำลังโหลดข้อมูลทีม...</div>
+</div>
+
+<div class="app" id="app" style="display:none">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="user-banner" id="user-banner" style="display:none">
+      <div class="ub-left">
+        <div class="ub-avatar" id="ub-avatar">👤</div>
+        <div>
+          <div class="ub-name" id="ub-name">-</div>
+        </div>
+      </div>
+      <div class="ub-right">
+        <span class="ub-badge">SHARED</span>
+        <button class="change-user-btn" onclick="openUserModal()">เปลี่ยน</button>
+      </div>
+    </div>
+
+    <div class="sb-top">
+      <div class="sb-logo">CTS · Team Edition</div>
+      <div class="sb-title">Clinic Outcome<br>Tracker</div>
+      <div class="sb-sub">วัดผลการเทรนแยกรายคลินิก</div>
+      <div class="sb-sync" id="sync-status">
+        <span class="sync-dot"></span> ข้อมูลเก็บในเครื่อง · บันทึกอัตโนมัติ
+      </div>
+    </div>
+    <div class="sb-stats">
+      <div class="stat-box"><div class="stat-num sn-white" id="st-total">0</div><div class="stat-label">คลินิก<br>ทั้งหมด</div></div>
+      <div class="stat-box"><div class="stat-num sn-green" id="st-green">0</div><div class="stat-label">On<br>Track 🟢</div></div>
+      <div class="stat-box"><div class="stat-num sn-amber" id="st-amber">0</div><div class="stat-label">ต้อง<br>ปรับ 🟡</div></div>
+      <div class="stat-box"><div class="stat-num sn-red" id="st-red">0</div><div class="stat-label">เร่งด่วน<br>🔴</div></div>
+    </div>
+    <div class="filter-tabs" id="filter-tabs">
+      <button class="filter-tab active" id="ft-all" onclick="setFilter('all')">
+        <span class="ft-count" id="fc-all">0</span>ทั้งหมด
+      </button>
+      <button class="filter-tab" id="ft-mine" onclick="setFilter('mine')">
+        <span class="ft-count" id="fc-mine">0</span>ของฉัน
+      </button>
+    </div>
+    <div class="sb-section-label" id="sb-filter-label">คลินิกทั้งหมด</div>
+    <div class="clinic-list" id="clinic-list"></div>
+    <button class="add-btn" onclick="openModal()"><span style="font-size:15px">+</span> เพิ่มคลินิกใหม่</button>
+    <div class="sb-footer">
+      <div class="sf-date" id="today-date"></div>
+      <div class="sf-storage">ข้อมูลเก็บใน Browser · ไม่หายเมื่อปิดหน้าต่าง</div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+    <div class="empty-state">
+      <div class="es-icon">🏥</div>
+      <div class="es-title">ยังไม่มีคลินิก</div>
+      <div class="es-desc">กด "+ เพิ่มคลินิกใหม่" ทางซ้ายเพื่อเริ่มบันทึก</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT MODAL -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">เพิ่มคลินิกใหม่</div>
+    <div class="modal-sub" id="modal-sub">กรอกข้อมูลเบื้องต้นของคลินิก</div>
+    <input type="hidden" id="modal-mode" value="add">
+    <input type="hidden" id="modal-cid" value="">
+    <label class="f-label">ชื่อคลินิก *</label>
+    <input type="text" class="f-in" id="m-name" placeholder="เช่น คลินิกผิวสวย สาขาลาดพร้าว">
+    <div class="f-row">
+      <div>
+        <label class="f-label">Package</label>
+        <select class="f-sel" id="m-pkg" onchange="onPkgChange()">
+          <option value="E">MAX-Entry (1 Session)</option>
+          <option value="A" selected>MAX-A (3 Sessions)</option>
+          <option value="B">MAX-B (4–6 Sessions)</option>
+        </select>
+        <div class="pkg-note" id="pkg-note">3 Sessions — Lecture + Hands-on 2 ครั้ง</div>
+      </div>
+      <div>
+        <label class="f-label">Doctor Level</label>
+        <select class="f-sel" id="m-level">
+          <option value="std">Standard Course</option>
+          <option value="adv">Advanced Course</option>
+        </select>
+      </div>
+    </div>
+    <div id="m-sess-wrap">
+      <label class="f-label">จำนวน Sessions (MAX-B)</label>
+      <select class="f-sel" id="m-sess" style="width:100%">
+        <option value="4" selected>4 Sessions</option>
+        <option value="5">5 Sessions</option>
+        <option value="6">6 Sessions</option>
+      </select>
+    </div>
+    <div class="f-row">
+      <div>
+        <label class="f-label">จำนวน Doctor</label>
+        <input type="number" class="f-in-n" id="m-docs" value="2" min="1" max="50">
+      </div>
+      <div>
+        <label class="f-label">CTS ที่รับผิดชอบ</label>
+        <select class="f-sel" id="m-cts">
+          <option value="V">CTS-V (Victory)</option>
+          <option value="C">CTS-C (Champion)</option>
+          <option value="W">CTS-W (Winner)</option>
+        </select>
+      </div>
+    </div>
+    <label class="f-label">วันที่เริ่มเทรน</label>
+    <input type="text" class="f-in" id="m-date" placeholder="เช่น 1 พ.ค. 2568">
+    <div class="modal-btns">
+      <button class="btn btn-danger" id="delete-btn" onclick="deleteClinic()" style="display:none">ลบคลินิกนี้</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="saveClinic()">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- USER SELECT MODAL -->
+<div class="overlay" id="user-overlay">
+  <div class="user-modal">
+    <div class="modal-title">เลือกตัวคุณในทีม</div>
+    <div class="modal-sub">ข้อมูลจะแสดงว่าใครเป็นคนบันทึก</div>
+    <div class="user-list" id="user-list"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeUserModal()">ยกเลิก</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══ TEAM MEMBERS ═══ */
+var TEAM = [
+  {id:'parichat',   name:'Parichat',   avatar:'👤'},
+  {id:'kanwara',    name:'Kanwara',     avatar:'👤'},
+  {id:'narakamon',  name:'Narakamon',   avatar:'👤'},
+  {id:'witchukorn', name:'Witchukorn',  avatar:'👤'},
+  {id:'koollanut',  name:'Koollanut',   avatar:'👤'},
+  {id:'pariyachat', name:'Pariyachat',  avatar:'👤'},
+  {id:'pitchaporn', name:'Pitchaporn',  avatar:'👤'},
+  {id:'onkamol',    name:'Onkamol',     avatar:'👤'},
+];
+
+var STORAGE_KEY = 'cts_clinics_shared';
+var CURRENT_USER_KEY = 'cts_current_user';
+var GAS_URL = ''; // ← ใส่ URL จาก GAS หลัง deploy เช่น https://script.google.com/macros/s/xxx/exec
+var _syncTimer = null;
+var clinics = [];
+var activeId = null;
+var currentUser = null;
+var clinicFilter = 'all'; // 'all' | 'mine'
+
+function setFilter(f){
+  clinicFilter = f;
+  document.getElementById('ft-all').classList.toggle('active', f==='all');
+  document.getElementById('ft-mine').classList.toggle('active', f==='mine');
+  var lbl = document.getElementById('sb-filter-label');
+  if(lbl) lbl.textContent = f==='mine' ? 'คลินิกของฉัน' : 'คลินิกทั้งหมด';
+  // clear selection if filtered clinic no longer visible
+  if(f==='mine' && activeId && currentUser){
+    var c = clinics.find(function(x){return x.id===activeId;});
+    if(c && c.createdBy !== currentUser.name && c.lastEditBy !== currentUser.name){
+      activeId = null;
+      document.getElementById('main').innerHTML = '<div class="empty-state"><div class="es-icon">🏥</div><div class="es-title">เลือกคลินิกจากรายการ</div><div class="es-desc">กรองแสดงเฉพาะคลินิกของคุณอยู่</div></div>';
+    }
+  }
+  renderSidebar();
+}
+
+/* ═══ PKG NOTES ═══ */
+var PKG_NOTES = {
+  E:'1 Session — Lecture + Hands-on ครั้งเดียว พร้อม D+14 follow-up',
+  A:'3 Sessions — Lecture + Hands-on 2 ครั้ง',
+  B:'4–6 Sessions — ปรับได้ตามความเหมาะสมของคลินิก'
+};
+
+function buildSessions(pkg, numSess){
+  if(pkg==='E') return [{num:'S1',title:'Lecture & Hands-on',sub:'Anatomy · Product Knowledge · Hands-on intro · Problem→Product Link',cn:'snE',isHO:true}];
+  if(pkg==='A') return [
+    {num:'S1',title:'Lecture & Foundation',sub:'Anatomy · Patient Assessment · Product Knowledge · Problem→Product Link',cn:'sn1',isHO:false},
+    {num:'S2',title:'Hands-on ครั้งที่ 1',sub:'Basic technique · เลือก Product focus (EBD / Port / ทั้งคู่)',cn:'sn2',isHO:true},
+    {num:'S3',title:'Hands-on ครั้งที่ 2',sub:'Complication & Case review · Safety protocol',cn:'sn3',isHO:true}
+  ];
+  var s=[{num:'S1',title:'Lecture & Foundation',sub:'Anatomy · Patient Assessment · Product Knowledge · Problem→Product Link',cn:'sn1',isHO:false}];
+  var hoColors=['sn2','sn3','sn4','sn2','sn3'];
+  var hoNames=['Basic technique · เลือก Product focus','Advanced technique · Complication','Case Review · Clinic SOP · KTL pathway','Advanced Case Review & Portfolio','Hands-on Mastery & Final Assessment'];
+  for(var i=0;i<(numSess-1);i++) s.push({num:'S'+(i+2),title:'Hands-on ครั้งที่ '+(i+1),sub:hoNames[i]||'Hands-on session',cn:hoColors[i]||'sn4',isHO:true});
+  return s;
+}
+
+function uid(){return Date.now()+'_'+Math.random().toString(36).slice(2,6)}
+
+function mkClinic(name,pkg,numSess,level,numDocs,ctsTeam,startDate,createdBy){
+  var sdefs=buildSessions(pkg,numSess);
+  var n=sdefs.length;
+  // doctors: array of {name} per session — each session starts with numDocs empty slots
+  function mkDoctors(nd){ return Array(nd).fill(null).map(function(){ return {name:'',pre:0,post:0}; }); }
+  return {
+    id:uid(),name,pkg,numSess:parseInt(numSess)||n,level,numDocs:parseInt(numDocs)||1,ctsTeam,startDate,
+    createdBy:createdBy||'',createdAt:new Date().toLocaleDateString('th-TH'),sdefs,
+    sessions:Array(n).fill(null).map(function(){return{done:false,date:''}}),
+    doctors: Array(n).fill(null).map(function(){ return mkDoctors(parseInt(numDocs)||1); }),
+    handSkill: Array(n).fill(''),   // '' | 'pass' | 'cond' | 'retrain'
+    pdfFiles:  Array(n).fill(null), // {name,size,dataUrl} per session
+    sat_stars:Array(n).fill(0),sat_count:Array(n).fill(0),notes:Array(n).fill(''),
+    d14:Array(n).fill(null).map(function(){return{adopt:'',repeat:'',first_case:'',barrier:''}}),
+    adopt_count:'',repeat_req:'',first_case:'',barrier:'',
+    lastEditBy:'',lastEditAt:''
+  };
+}
+
+/* ═══ STORAGE ═══ */
+/* ═══ SYNC STATUS ═══ */
+function showSyncStatus(state){
+  var si = document.getElementById('sync-status');
+  if(!si) return;
+  if(state==='saving')   si.innerHTML='<span class="sync-dot" style="background:#FBB040"></span> กำลังบันทึก...';
+  else if(state==='syncing') si.innerHTML='<span class="sync-dot" style="background:#60A5FA"></span> กำลัง Sync...';
+  else if(state==='synced')  si.innerHTML='<span class="sync-dot"></span> Synced · ทีมเห็นข้อมูลเดียวกัน';
+  else if(state==='offline') si.innerHTML='<span class="sync-dot" style="background:#F87171;animation:none"></span> Offline · บันทึกเฉพาะเครื่อง';
+  else if(state==='loading') si.innerHTML='<span class="sync-dot" style="background:#60A5FA"></span> กำลังโหลด...';
+}
+
+/* ═══ STORAGE ═══ */
+function saveToStorage(){
+  var ts = Date.now();
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clinics));
+    localStorage.setItem(STORAGE_KEY+'_ts', ts);
+    showSyncStatus('saving');
+  }catch(e){ console.log('Storage save error:', e); alert('บันทึกไม่สำเร็จ: '+e.message); return; }
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(function(){ _syncToGAS(ts); }, 2000);
+}
+
+function _syncToGAS(ts){
+  if(!GAS_URL){ showSyncStatus('synced'); return; }
+  showSyncStatus('syncing');
+  fetch(GAS_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({data: JSON.stringify(clinics), ts: ts, user: currentUser?currentUser.name:'unknown'})
+  }).then(function(){ showSyncStatus('synced'); })
+  .catch(function(){ showSyncStatus('offline'); });
+}
+
+function loadFromGAS(){
+  if(!GAS_URL){ _loadFromLocal(); return; }
+  showSyncStatus('loading');
+  fetch(GAS_URL+'?t='+Date.now())
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    var localTs = parseInt(localStorage.getItem(STORAGE_KEY+'_ts')||0);
+    var gasTs   = parseInt(res.ts||0);
+    if(gasTs > localTs && res.data){
+      try{
+        var parsed = JSON.parse(res.data);
+        if(Array.isArray(parsed)){
+          clinics = parsed;
+          _migrateClinics();
+          localStorage.setItem(STORAGE_KEY, res.data);
+          localStorage.setItem(STORAGE_KEY+'_ts', gasTs);
+          renderSidebar();
+          if(activeId){ var c=clinics.find(function(x){return x.id===activeId}); if(c) selectClinic(activeId); }
+        }
+      }catch(ex){ console.log('GAS parse error',ex); }
+    } else {
+      _loadFromLocal();
+    }
+    showSyncStatus('synced');
+  })
+  .catch(function(){ _loadFromLocal(); showSyncStatus('offline'); });
+}
+
+function _migrateClinics(){
+  clinics.forEach(function(c){
+    if(!c.sdefs) c.sdefs = buildSessions(c.pkg, c.numSess);
+  });
+}
+
+function _loadFromLocal(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    var parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed)) return;
+    parsed.forEach(function(c){
+      if(!c.sdefs) c.sdefs = buildSessions(c.pkg, c.numSess);
+      var n = c.sdefs.length;
+      if(!c.doctors){
+        c.doctors = c.sdefs.map(function(_,i){
+          var nd = c.numDocs||1; var docs = [];
+          for(var d=0;d<nd;d++){
+            docs.push({ name:'Doctor '+(d+1),
+              pre: d===0?(c.cts_score_pre?c.cts_score_pre[i]:0)||0:0,
+              post: d===0?(c.cts_score_post?c.cts_score_post[i]:0)||0:0 });
+          }
+          return docs;
+        });
+      }
+      if(!c.d14) c.d14 = c.sdefs.map(function(){return{adopt:'',repeat:'',first_case:'',barrier:''};});
+      if(!c.handSkill) c.handSkill = Array(n).fill('');
+      if(!c.pdfFiles)  c.pdfFiles  = Array(n).fill(null);
+      if(!c.sat_stars) c.sat_stars = Array(n).fill(0);
+      if(!c.sat_count) c.sat_count = Array(n).fill(0);
+      if(!c.notes) c.notes = Array(n).fill('');
+      if(!c.sessions) c.sessions = Array(n).fill(null).map(function(){return{done:false,date:''};});
+      if(!c.createdBy) c.createdBy = '';
+      if(!c.lastEditBy) c.lastEditBy = '';
+    });
+    clinics = parsed;
+  }catch(e){ console.log('Storage load error:', e); clinics = []; }
+}
+
+function saveUserPref(userId){
+  try{ localStorage.setItem(CURRENT_USER_KEY, userId); }catch(e){}
+}
+function loadUserPref(){
+  try{ return localStorage.getItem(CURRENT_USER_KEY); }catch(e){ return null; }
+}
+
+/* ═══ USER ═══ */
+function setUser(user){
+  currentUser = user;
+  saveUserPref(user.id);
+  document.getElementById('ub-avatar').textContent = user.avatar;
+  document.getElementById('ub-name').textContent = 'CTS · ' + user.name;
+  document.getElementById('user-banner').style.display = 'flex';
+  // refresh filter label
+  var lbl = document.getElementById('sb-filter-label');
+  if(lbl) lbl.textContent = clinicFilter==='mine' ? 'คลินิกของฉัน' : 'คลินิกทั้งหมด';
+  renderSidebar();
+}
+
+function openUserModal(){
+  var list = document.getElementById('user-list');
+  list.innerHTML = '';
+  TEAM.forEach(function(u){
+    var btn = document.createElement('button');
+    btn.className = 'user-btn' + (currentUser && currentUser.id===u.id ? ' selected' : '');
+    btn.innerHTML = '<div class="ub-uname">'+u.avatar+' '+u.name+'</div>';
+    btn.onclick = function(){
+      setUser(u);
+      closeUserModal();
+      if(!currentUser) document.getElementById('user-overlay').classList.remove('show');
+    };
+    list.appendChild(btn);
+  });
+  document.getElementById('user-overlay').classList.add('show');
+}
+function closeUserModal(){ document.getElementById('user-overlay').classList.remove('show'); }
+
+/* ═══ SCORING ═══ */
+function getSessionDelta(c, i){
+  // avg delta across all doctors in this session
+  var docs = c.doctors && c.doctors[i] ? c.doctors[i] : [];
+  var deltas = [];
+  docs.forEach(function(d){ if(d.pre>0&&d.post>0) deltas.push(d.post-d.pre); });
+  if(!deltas.length) return null;
+  return deltas.reduce(function(a,b){return a+b},0)/deltas.length;
+}
+function calcScore(c){
+  var sdefs=c.sdefs||buildSessions(c.pkg,c.numSess);
+  var n=sdefs.length;
+  var done=c.sessions.filter(function(s){return s.done}).length;
+  var compPct=n?(done/n)*100:0;
+  var sessionDeltas=[];
+  for(var i=0;i<n;i++){
+    if(!c.sessions[i].done) continue;
+    var d=getSessionDelta(c,i);
+    if(d!==null) sessionDeltas.push(d);
+  }
+  var avgDelta=sessionDeltas.length?sessionDeltas.reduce(function(a,b){return a+b},0)/sessionDeltas.length:null;
+  var deltaPct=avgDelta!==null?Math.min(100,Math.max(0,(avgDelta/5)*100)):null;
+  var satArr=[];
+  for(var i=0;i<n;i++){
+    if(c.sessions[i].done&&c.sat_stars[i]>0) satArr.push((c.sat_stars[i]/5)*100);
+  }
+  var avgSat=satArr.length?satArr.reduce(function(a,b){return a+b},0)/satArr.length:null;
+  var adoptArr=[];
+  for(var i=0;i<n;i++){
+    if(!sdefs[i].isHO||!c.sessions[i].done) continue;
+    var v=parseFloat(c.d14[i].adopt);
+    var nd=c.doctors&&c.doctors[i]?c.doctors[i].length:c.numDocs;
+    if(!isNaN(v)&&nd>0) adoptArr.push((v/nd)*100);
+  }
+  if(adoptArr.length===0){
+    var v=parseFloat(c.adopt_count);
+    if(!isNaN(v)&&c.numDocs>0) adoptArr.push((v/c.numDocs)*100);
+  }
+  var adoptPct=adoptArr.length?adoptArr.reduce(function(a,b){return a+b},0)/adoptArr.length:null;
+
+  // Hand Skill score — per HO session that has a result
+  var SKILL_MAP={'pass':100,'cond':60,'retrain':0};
+  var skillArr=[];
+  for(var i=0;i<n;i++){
+    if(!sdefs[i].isHO||!c.sessions[i].done) continue;
+    var hs=c.handSkill&&c.handSkill[i]?c.handSkill[i]:'';
+    if(hs && SKILL_MAP[hs]!==undefined) skillArr.push(SKILL_MAP[hs]);
+  }
+  var skillPct=skillArr.length?skillArr.reduce(function(a,b){return a+b},0)/skillArr.length:null;
+
+  // Weights: Completion 10, Delta 20, Sat 15, HandSkill 30, Adoption 25
+  var score=0,wt=0;
+  score+=compPct*0.10; wt+=0.10;
+  if(deltaPct!==null){score+=deltaPct*0.20;wt+=0.20}
+  if(avgSat!==null){score+=avgSat*0.15;wt+=0.15}
+  if(adoptPct!==null){score+=adoptPct*0.25;wt+=0.25}
+  if(skillPct!==null){score+=skillPct*0.30;wt+=0.30}
+  var total=wt>=0.2?Math.min(100,Math.round(score/wt)):null;
+  return{total,compPct,deltaPct,avgDelta,avgSat,adoptPct,skillPct};
+}
+
+function resultInfo(score){
+  if(score===null) return{label:'รอข้อมูล',icon:'⏳',cls:'rb-gray',ab:'ab-gray',borderColor:'var(--ink4)',action:'กรอกข้อมูลใน session และผล D+14'};
+  if(score>=70) return{label:'On Track 🟢',icon:'🟢',cls:'rb-green',ab:'ab-green',borderColor:'var(--green)',action:'Doctor พัฒนาได้ดี · ใช้ product จริง · แชร์เป็น best practice'};
+  if(score>=50) return{label:'ต้องปรับปรุง 🟡',icon:'🟡',cls:'rb-amber',ab:'ab-amber',borderColor:'var(--amber)',action:'มีบางจุดต้องพัฒนา · คุยกับ SM · วาง action plan ภายใน 2 สัปดาห์'};
+  return{label:'เร่งด่วน 🔴',icon:'🔴',cls:'rb-red',ab:'ab-red',borderColor:'var(--red)',action:'ผลต่ำกว่ามาตรฐาน · SM joint visit + root cause analysis ทันที'};
+}
+
+/* ═══ SIDEBAR ═══ */
+function renderSidebar(){
+  var list=document.getElementById('clinic-list');
+  list.innerHTML='';
+  var green=0,amber=0,red=0;
+
+  // count "mine" — clinics created by or last edited by current user
+  var myName = currentUser ? currentUser.name : null;
+  var mineCount = myName ? clinics.filter(function(c){
+    return c.createdBy===myName || c.lastEditBy===myName || c.ctsTeam===(currentUser?currentUser.id:'');
+  }).length : 0;
+
+  // update tab counts
+  var fcAll = document.getElementById('fc-all');
+  var fcMine = document.getElementById('fc-mine');
+  if(fcAll) fcAll.textContent = clinics.length;
+  if(fcMine) fcMine.textContent = mineCount;
+
+  // apply filter
+  var visible = clinics.filter(function(c){
+    if(clinicFilter==='mine' && myName){
+      return c.createdBy===myName || c.lastEditBy===myName || c.ctsTeam===(currentUser?currentUser.id:'');
+    }
+    return true;
+  });
+
+  visible.forEach(function(c){
+    var sc=calcScore(c),res=resultInfo(sc.total);
+    var scoreText=sc.total===null?'–':sc.total;
+    var scoreCls=sc.total===null?'':sc.total>=70?'cbs-green':sc.total>=50?'cbs-amber':'cbs-red';
+    var done=c.sessions.filter(function(s){return s.done}).length;
+    var total=c.sdefs?c.sdefs.length:1;
+    var prog=total>0?(done/total)*100:0;
+    if(sc.total!==null){if(sc.total>=70)green++;else if(sc.total>=50)amber++;else red++;}
+    var pkgLbl=c.pkg==='E'?'MAX-Entry':c.pkg==='A'?'MAX-A':'MAX-B';
+    var tagCls=c.pkg==='E'?'tag-e':c.pkg==='A'?'tag-a':'tag-b';
+    // count urgent follow-ups
+    var urgentCount=0;
+    if(c.sdefs) c.sdefs.forEach(function(sd,i){
+      if(!sd.isHO||!c.sessions[i].done) return;
+      if(String(c.d14[i].adopt)!=='') return;
+      var fu=followUpStatus(c.sessions[i].date);
+      if(fu&&fu.urgent) urgentCount++;
+    });
+    var urgentBadge=urgentCount?`<span style="background:var(--red);color:white;border-radius:50%;width:16px;height:16px;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">!</span>`:'';
+    var btn=document.createElement('button');
+    btn.className='clinic-btn'+(c.id===activeId?' active':'');
+    btn.innerHTML=`<div class="cb-avatar">${c.pkg==='E'?'⚡':c.pkg==='A'?'🏥':'🏢'}</div>
+      <div class="cb-info">
+        <div class="cb-name">${c.name}</div>
+        <div class="cb-meta"><span class="cb-pkg-tag ${tagCls}">${pkgLbl}</span>${c.level==='std'?'Standard':'Advanced'} · ${c.numDocs} Dr · CTS-${c.ctsTeam}</div>
+        <div class="session-progress"><div class="sp-fill" style="width:${prog}%"></div></div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        <div class="cb-score ${scoreCls}">${scoreText}</div>
+        ${urgentBadge}
+      </div>`;
+    btn.onclick=function(){selectClinic(c.id)};
+    list.appendChild(btn);
+  });
+
+  // stats always show all clinics totals
+  document.getElementById('st-total').textContent=clinics.length;
+  document.getElementById('st-green').textContent=green;
+  document.getElementById('st-amber').textContent=amber;
+  document.getElementById('st-red').textContent=red;
+
+  // empty state when filter=mine but no clinics
+  if(clinicFilter==='mine' && visible.length===0){
+    list.innerHTML='<div style="padding:16px 12px;font-size:12px;color:rgba(255,255,255,.3);text-align:center;line-height:1.6">ยังไม่มีคลินิกที่คุณสร้างหรือแก้ไข<br><span style="font-size:10px">เพิ่มคลินิกใหม่หรือเลือก "ทั้งหมด"</span></div>';
+  }
+}
+
+/* ═══ PER-DOCTOR HELPERS ═══ */
+function buildDocTableHTML(c, sessIdx){
+  var docs = c.doctors && c.doctors[sessIdx] ? c.doctors[sessIdx] : [];
+  if(!docs.length) return '<div style="font-size:11px;color:var(--ink3);padding:4px 0">ยังไม่มีคุณหมอในรอบนี้ — กด "+ เพิ่มคุณหมอ"</div>';
+
+  var preHeader='', postHeader='';
+  for(var v=1;v<=10;v++){
+    preHeader+='<th style="width:22px;text-align:center;padding:4px 2px">'+v+'</th>';
+  }
+
+  var rows = docs.map(function(doc, di){
+    var preBtns='', postBtns='';
+    for(var v=1;v<=10;v++){
+      var pSel = doc.pre===v ? 'sel-pre' : '';
+      var poSel = doc.post===v ? 'sel-post' : '';
+      preBtns += `<button class="sb-btn ${pSel}" style="width:22px;height:22px;font-size:9px" onclick="setDocScore('${c.id}',${sessIdx},${di},'pre',${v})">${v}</button>`;
+      postBtns += `<button class="sb-btn ${poSel}" style="width:22px;height:22px;font-size:9px" onclick="setDocScore('${c.id}',${sessIdx},${di},'post',${v})">${v}</button>`;
+    }
+    var delta = (doc.pre>0&&doc.post>0) ? doc.post-doc.pre : null;
+    var deltaBadge = delta!==null
+      ? '<span class="doc-delta '+(delta>0?'delta-pos':delta<0?'delta-neg':'delta-zero')+'">'+(delta>0?'+':'')+delta+'</span>'
+      : '<span style="font-size:10px;color:var(--ink4)">–</span>';
+    var rmBtn = docs.length>1
+      ? `<button onclick="removeDoctor('${c.id}',${sessIdx},${di})" style="border:none;background:none;cursor:pointer;color:var(--ink4);font-size:14px;line-height:1;padding:0 2px" title="ลบ">×</button>`
+      : '';
+    return `<tr>
+      <td><input type="text" class="doc-name-in" value="${doc.name}" placeholder="ชื่อคุณหมอ" oninput="setDocName('${c.id}',${sessIdx},${di},this.value)"></td>
+      <td><div class="score-row-btns">${preBtns}</div></td>
+      <td><div class="score-row-btns">${postBtns}</div></td>
+      <td>${deltaBadge}</td>
+      <td>${rmBtn}</td>
+    </tr>`;
+  }).join('');
+
+  // avg row
+  var validDeltas = docs.filter(function(d){return d.pre>0&&d.post>0;}).map(function(d){return d.post-d.pre;});
+  var avgDelta = validDeltas.length ? (validDeltas.reduce(function(a,b){return a+b},0)/validDeltas.length).toFixed(1) : '–';
+  var avgColor = validDeltas.length && parseFloat(avgDelta)>0 ? 'var(--green)' : 'var(--ink3)';
+
+  return `<table class="doc-table">
+    <thead><tr>
+      <th style="width:130px">คุณหมอ</th>
+      <th>ก่อนเทรน (1–10)</th>
+      <th>หลังเทรน (1–10)</th>
+      <th style="width:70px">Delta</th>
+      <th style="width:24px"></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+    ${validDeltas.length?`<tfoot><tr class="doc-avg-row">
+      <td colspan="3" style="color:var(--ink2);font-family:'DM Mono',monospace;font-size:10px">avg ทุกคนใน session นี้</td>
+      <td style="color:${avgColor};font-family:'DM Mono',monospace;font-size:12px;font-weight:700">${parseFloat(avgDelta)>0?'+':''}${avgDelta}</td>
+      <td></td>
+    </tr></tfoot>`:''}
+  </table>`;
+}
+
+function setDocScore(cid, sessIdx, docIdx, type, val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.doctors[sessIdx][docIdx][type] = val; markEdit(cid);
+  // re-render doctor table only
+  var wrap = document.getElementById('doc-table-wrap-'+cid+'-'+sessIdx);
+  if(wrap) wrap.innerHTML = buildDocTableHTML(c, sessIdx);
+  saveToStorage(); refreshOverview(cid);
+}
+function setDocName(cid, sessIdx, docIdx, val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.doctors[sessIdx][docIdx].name = val; markEdit(cid); saveToStorage();
+}
+function addDoctor(cid, sessIdx){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  var nd = c.doctors[sessIdx].length+1;
+  c.doctors[sessIdx].push({name:'Doctor '+nd, pre:0, post:0});
+  markEdit(cid);
+  var wrap = document.getElementById('doc-table-wrap-'+cid+'-'+sessIdx);
+  if(wrap) wrap.innerHTML = buildDocTableHTML(c, sessIdx);
+  saveToStorage();
+}
+function removeDoctor(cid, sessIdx, docIdx){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c||c.doctors[sessIdx].length<=1) return;
+  c.doctors[sessIdx].splice(docIdx,1);
+  markEdit(cid);
+  var wrap = document.getElementById('doc-table-wrap-'+cid+'-'+sessIdx);
+  if(wrap) wrap.innerHTML = buildDocTableHTML(c, sessIdx);
+  saveToStorage(); refreshOverview(cid);
+}
+
+/* ═══ DATE HELPERS ═══ */
+var TH_MONTHS_PARSE = {'ม.ค.':0,'ก.พ.':1,'มี.ค.':2,'เม.ย.':3,'พ.ค.':4,'มิ.ย.':5,'ก.ค.':6,'ส.ค.':7,'ก.ย.':8,'ต.ค.':9,'พ.ย.':10,'ธ.ค.':11};
+var TH_MONTHS_FMT   = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function parseTHDate(str){
+  // accepts "5 พ.ค. 68", "5 พ.ค. 2568", "5 พ.ค."
+  if(!str) return null;
+  var parts = str.trim().split(' ');
+  if(parts.length < 2) return null;
+  var day = parseInt(parts[0]);
+  var mon = TH_MONTHS_PARSE[parts[1]];
+  if(isNaN(day)||mon===undefined) return null;
+  var yr = parts[2] ? parseInt(parts[2]) : new Date().getFullYear()+543;
+  if(yr < 100) yr += 2500;
+  var d = new Date((yr-543), mon, day);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function addDays(date, n){
+  var d = new Date(date); d.setDate(d.getDate()+n); return d;
+}
+
+function formatTHDate(date){
+  return date.getDate()+' '+TH_MONTHS_FMT[date.getMonth()]+' '+(date.getFullYear()+543);
+}
+
+function followUpStatus(dateStr){
+  // returns {label, color, bg, border, daysLeft}
+  var trainDate = parseTHDate(dateStr);
+  if(!trainDate) return null;
+  var followUp = addDays(trainDate, 14);
+  var today = new Date(); today.setHours(0,0,0,0);
+  var daysLeft = Math.round((followUp - today) / 86400000);
+  var followUpStr = formatTHDate(followUp);
+  if(daysLeft < 0){
+    return {label:'เลยกำหนดแล้ว '+Math.abs(daysLeft)+' วัน · ควรโทรหา Doctor ทันที', followUpStr, daysLeft, color:'var(--red)', bg:'var(--red-l)', border:'#F0B4AE', icon:'🔴', urgent:true};
+  } else if(daysLeft === 0){
+    return {label:'วันนี้คือวัน D+14 · โทรหา Doctor เลย!', followUpStr, daysLeft, color:'var(--red)', bg:'var(--red-l)', border:'#F0B4AE', icon:'🔴', urgent:true};
+  } else if(daysLeft <= 3){
+    return {label:'อีก '+daysLeft+' วัน — ใกล้ถึงกำหนดแล้ว', followUpStr, daysLeft, color:'var(--orange)', bg:'var(--orange-l)', border:'#F5C090', icon:'🟡', urgent:true};
+  } else {
+    return {label:'อีก '+daysLeft+' วัน', followUpStr, daysLeft, color:'var(--teal)', bg:'var(--teal-l)', border:'#9FE1CB', icon:'📅', urgent:false};
+  }
+}
+
+/* ═══ HAND SKILL + PDF ═══ */
+function buildHandSkillHTML(c, i){
+  var hs = c.handSkill && c.handSkill[i] ? c.handSkill[i] : '';
+  var pf = c.pdfFiles  && c.pdfFiles[i]  ? c.pdfFiles[i]  : null;
+
+  var labels = {
+    pass:    {text:'✓ Pass',          cls:'sel-pass',   chip:'src-pass',    desc:'ผ่านเกณฑ์ — Hands-on skill ได้มาตรฐาน'},
+    cond:    {text:'⚠ Conditional Pass', cls:'sel-cond', chip:'src-cond',   desc:'ผ่านแบบมีเงื่อนไข — ต้องฝึกเพิ่มในจุดที่บกพร่อง'},
+    retrain: {text:'✗ Re-Training Required', cls:'sel-retrain', chip:'src-retrain', desc:'ไม่ผ่าน — ต้องเทรนซ้ำก่อนประเมินใหม่'}
+  };
+
+  var btns = ['pass','cond','retrain'].map(function(k){
+    var l=labels[k];
+    return `<button class="skill-btn ${hs===k?l.cls:''}" onclick="setHandSkill('${c.id}',${i},'${k}')">${l.text}</button>`;
+  }).join('');
+
+  var chipHTML = hs && labels[hs]
+    ? `<div style="margin-top:7px;font-size:11px;color:var(--ink2)">${labels[hs].desc}</div>`
+    : '';
+
+  // PDF section
+  var pdfHTML = '';
+  if(pf){
+    pdfHTML = `<div class="pdf-attached">
+      <span style="font-size:16px">📄</span>
+      <span class="pdf-name" title="${pf.name}">${pf.name}</span>
+      <span class="pdf-size">${pf.size}</span>
+      <button class="pdf-view-btn" onclick="viewPdf('${c.id}',${i})">เปิด</button>
+      <button class="pdf-remove" onclick="removePdf('${c.id}',${i})" title="ลบไฟล์">×</button>
+    </div>`;
+  } else {
+    pdfHTML = `<label class="pdf-drop" title="อัปโหลดใบประเมิน PDF">
+      <span style="font-size:18px">📎</span>
+      <span>อัปโหลดใบประเมิน PDF — คลิกหรือลากไฟล์มาวาง</span>
+      <input type="file" accept=".pdf,application/pdf" onchange="handlePdfUpload(event,'${c.id}',${i})">
+    </label>`;
+  }
+
+  return `<div class="skill-section">
+    <div class="skill-head">
+      <span class="skill-badge">HAND SKILL</span>
+      <span class="skill-title">ประเมิน Hands-on Skill — ผลการประเมินภาคปฏิบัติ</span>
+    </div>
+    <div class="skill-btns">${btns}</div>
+    ${chipHTML}
+    <div class="pdf-upload-wrap">
+      <span class="pdf-upload-label">แนบใบประเมิน (PDF)</span>
+      ${pdfHTML}
+    </div>
+  </div>`;
+}
+
+function setHandSkill(cid, i, val){
+  var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
+  c.handSkill[i] = c.handSkill[i]===val ? '' : val; // toggle
+  markEdit(cid);
+  var wrap=document.getElementById('skill-wrap-'+cid+'-'+i);
+  if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i);
+  saveToStorage(); refreshOverview(cid);
+}
+
+function handlePdfUpload(evt, cid, i){
+  var file=evt.target.files[0]; if(!file)return;
+  var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
+  var maxMB=10;
+  if(file.size>maxMB*1024*1024){ alert('ไฟล์ใหญ่เกิน '+maxMB+'MB กรุณาบีบอัดก่อนอัปโหลด'); return; }
+  var sizeStr = file.size>1024*1024 ? (file.size/1024/1024).toFixed(1)+' MB' : Math.round(file.size/1024)+' KB';
+  var reader=new FileReader();
+  reader.onload=function(e){
+    c.pdfFiles[i]={name:file.name, size:sizeStr, dataUrl:e.target.result};
+    markEdit(cid);
+    var wrap=document.getElementById('skill-wrap-'+cid+'-'+i);
+    if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i);
+    saveToStorage();
+  };
+  reader.readAsDataURL(file);
+}
+
+function viewPdf(cid, i){
+  var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
+  var pf=c.pdfFiles&&c.pdfFiles[i]; if(!pf)return;
+  var win=window.open(); win.document.write('<iframe src="'+pf.dataUrl+'" width="100%" height="100%" style="border:none"></iframe>');
+}
+
+function removePdf(cid, i){
+  var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
+  if(!confirm('ลบไฟล์ '+c.pdfFiles[i].name+' ออกหรือไม่?')) return;
+  c.pdfFiles[i]=null; markEdit(cid);
+  var wrap=document.getElementById('skill-wrap-'+cid+'-'+i);
+  if(wrap) wrap.innerHTML=buildHandSkillHTML(c,i);
+  saveToStorage();
+}
+
+/* ═══ RENDER CLINIC ═══ */
+function selectClinic(id){activeId=id;renderSidebar();var c=clinics.find(function(x){return x.id===id});if(c)renderClinic(c);}
+
+function renderClinic(c){
+  var main=document.getElementById('main');
+  if(!c.sdefs) c.sdefs=buildSessions(c.pkg,c.numSess);
+  var sdefs=c.sdefs;
+  var sc=calcScore(c),res=resultInfo(sc.total);
+  var scoreDisplay=sc.total===null?'–':sc.total;
+  var done=c.sessions.filter(function(s){return s.done}).length;
+  var satAvg=[];
+  for(var i=0;i<sdefs.length;i++){if(c.sessions[i].done&&c.sat_stars[i]>0)satAvg.push(c.sat_stars[i]);}
+  var satDisplay=satAvg.length?(satAvg.reduce(function(a,b){return a+b},0)/satAvg.length).toFixed(1)+'★':'–';
+  var adoptN=parseFloat(c.adopt_count);
+  var adoptDisplay=isNaN(adoptN)?'–':adoptN+'/'+c.numDocs+' คน';
+  var deltaDisplay=sc.avgDelta!==null?(sc.avgDelta>0?'+':'')+sc.avgDelta.toFixed(1):'–';
+  var editInfo=c.lastEditBy?`<span class="saved-chip">บันทึกล่าสุดโดย ${c.lastEditBy} · ${c.lastEditAt}</span>`:'';
+  var createdInfo=c.createdBy?`สร้างโดย ${c.createdBy} · ${c.createdAt||''}`:' ';
+
+  var sessHTML='';
+  sdefs.forEach(function(sd,i){
+    var ds=c.sessions[i];
+    var starsHTML='';
+    for(var s=1;s<=5;s++) starsHTML+=`<button class="star-btn" onclick="setStar('${c.id}',${i},${s})">${c.sat_stars[i]>=s?'⭐':'☆'}</button>`;
+    var satCountTxt=c.sat_count[i]>0?`(${c.sat_count[i]} คนตอบ · avg rating)`:'';
+    var dateChip=ds.date?`<span class="sess-date-chip">${ds.date}</span>`:'';
+    var d=c.d14[i];
+    var numDocs = c.doctors&&c.doctors[i] ? c.doctors[i].length : c.numDocs;
+    var d14HTML='';
+    if(sd.isHO){
+      var fuStatus = followUpStatus(ds.date);
+      var fuBanner = '';
+      if(ds.date && !String(d.adopt)){
+        // only show reminder if adopt not yet filled
+        if(fuStatus){
+          fuBanner = `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;background:${fuStatus.bg};border:1px solid ${fuStatus.border};margin-bottom:9px">
+            <span style="font-size:15px">${fuStatus.icon}</span>
+            <div style="font-size:11.5px;color:${fuStatus.color}">
+              <b>กำหนด Follow-up: ${fuStatus.followUpStr}</b><br>
+              ${fuStatus.label}
+            </div>
+          </div>`;
+        }
+      } else if(ds.date && String(d.adopt) !== ''){
+        fuBanner = `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;background:var(--green-l);border:1px solid #A8E4BD;margin-bottom:9px;font-size:11.5px;color:var(--green)">
+          <span>✅</span> <b>กรอก D+14 แล้ว</b> · Follow-up วันที่ ${fuStatus?fuStatus.followUpStr:'–'}
+        </div>`;
+      } else if(!ds.date){
+        fuBanner = `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:7px;background:var(--paper);border:1px solid var(--border);margin-bottom:9px;font-size:11.5px;color:var(--ink3)">
+          <span>📅</span> ใส่วันที่เทรนด้านบนเพื่อคำนวณวัน Follow-up D+14
+        </div>`;
+      }
+      d14HTML=`<div class="d14-inline">
+        <div class="d14-inline-head"><span class="d14-inline-badge">D+14</span><span class="d14-inline-title">ผลติดตาม 14 วันหลัง Session นี้</span></div>
+        ${fuBanner}
+        <div class="d14-row"><div class="m-dot" style="background:var(--blue)"></div><div class="d14-label"><b>Doctor ใช้ product จริง?</b><br><span style="font-size:10px;color:var(--ink3)">(จาก ${numDocs} คนใน session นี้)</span></div>
+          <div class="m-input-area"><input type="number" class="num-in" placeholder="0" min="0" max="${numDocs}" value="${d.adopt}" oninput="setD14('${c.id}',${i},'adopt',this.value)" style="width:50px"><span style="font-size:11px;color:var(--ink3)">/${numDocs}</span></div></div>
+        <div class="d14-row"><div class="m-dot" style="background:var(--purple)"></div><div class="d14-label"><b>ขอนัด session ต่อไปเองไหม?</b></div>
+          <select class="sel-in" onchange="setD14('${c.id}',${i},'repeat',this.value)">
+            <option value="" ${!d.repeat?'selected':''}>เลือก...</option>
+            <option value="yes" ${d.repeat==='yes'?'selected':''}>✓ ขอเพิ่มเอง</option>
+            <option value="no" ${d.repeat==='no'?'selected':''}>ยังไม่ได้ขอ</option></select></div>
+        <div class="d14-row"><div class="m-dot" style="background:var(--teal)"></div><div class="d14-label"><b>ส่ง case มาแล้วหรือยัง?</b></div>
+          <select class="sel-in" onchange="setD14('${c.id}',${i},'first_case',this.value)">
+            <option value="" ${!d.first_case?'selected':''}>เลือก...</option>
+            <option value="yes" ${d.first_case==='yes'?'selected':''}>✓ ส่งแล้ว</option>
+            <option value="no" ${d.first_case==='no'?'selected':''}>ยังไม่ส่ง</option></select></div>
+        <div class="d14-row" style="border-bottom:none"><div class="m-dot" style="background:var(--amber)"></div><div class="d14-label"><b>เหตุผลที่ยังไม่ใช้ (ถ้ามี)</b></div>
+          <div class="d14-note-wrap"><input type="text" class="note-in" placeholder="จดไว้..." value="${d.barrier}" oninput="setD14('${c.id}',${i},'barrier',this.value)" style="font-size:11.5px"></div></div>
+      </div>`;
+    }
+    sessHTML+=`<div class="sess-card" id="sc-${c.id}-${i}">
+      <div class="sess-head ${ds.done?'open':''}" onclick="toggleSess('${c.id}',${i})">
+        <div class="sess-num ${sd.cn}">${sd.num}</div>
+        <div class="sess-info"><div class="sess-title">${sd.title}</div><div class="sess-sub">${sd.sub}</div></div>
+        ${dateChip}
+        <div class="sess-check ${ds.done?'done':''}" onclick="event.stopPropagation();toggleDone('${c.id}',${i})" title="กาเมื่อเทรนแล้ว">${ds.done?'✓':''}</div>
+        <div class="sess-chevron" id="chev-${c.id}-${i}">▾</div>
+      </div>
+      <div class="sess-body ${ds.done?'open':''}" id="sb-${c.id}-${i}">
+        <div class="m-row">
+          <div class="m-dot" style="background:var(--ink3)"></div>
+          <div class="m-info"><div class="m-name">วันที่เข้าเทรน</div></div>
+          <div class="m-input-area"><input type="text" class="date-in" placeholder="เช่น 5 พ.ค. 68" value="${ds.date||''}" oninput="setDate('${c.id}',${i},this.value)"></div>
+        </div>
+
+        <div class="m-group-title" style="margin:12px 0 8px">🎯 CTS Assessment — ประเมินรายคุณหมอ (1–10) คะแนน avg ถูกนำไปคิดรวม</div>
+        <div id="doc-table-wrap-${c.id}-${i}">
+          ${buildDocTableHTML(c,i)}
+        </div>
+        <button class="add-doc-btn" onclick="addDoctor('${c.id}',${i})">+ เพิ่มคุณหมอในรอบนี้</button>
+
+        <div class="m-row" style="padding-top:12px">
+          <div class="m-dot" style="background:var(--amber)"></div>
+          <div class="m-info"><div class="m-name">Doctor ให้คะแนน session นี้ <span style="font-size:10px;color:var(--ink3)">— QR Code (1–5 ดาว) ทุกคนแสกน QR เดียวกัน</span></div></div>
+        </div>
+        <div style="padding:7px 0 9px 17px">
+          <div class="qr-section"><div class="qr-top">
+            <div class="qr-box"><div id="qr-${c.id}-${i}" style="width:58px;height:58px"></div></div>
+            <div class="qr-info">
+              <div class="qr-title">แสกน QR ให้ Doctor กรอก</div>
+              <div class="qr-desc">Doctor แต่ละคนแสกน QR เดียวกัน กดดาว 1–5 ก่อนกลับ ระบบนับจำนวนคนที่ตอบและเฉลี่ยให้</div>
+              <div class="star-row">
+                <div id="stars-${c.id}-${i}">${starsHTML}</div>
+                <span class="star-avg" id="star-avg-${c.id}-${i}">${c.sat_stars[i]>0?c.sat_stars[i]+'.0★':''}</span>
+                <span class="star-count" id="star-count-${c.id}-${i}">${satCountTxt}</span>
+              </div>
+              <div style="font-size:9.5px;color:var(--ink3);margin-top:3px">กดดาวด้านบนเพื่อบันทึกค่าเฉลี่ย · ระบบนับจำนวนคนที่กดดาวเอง</div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="m-row" style="border-bottom:none;padding-top:9px">
+          <div class="m-dot" style="background:var(--purple)"></div>
+          <div class="m-info"><div class="m-name">บันทึกจาก session</div><div class="m-how">คำถาม / สิ่งต้องติดตาม / ปัญหา</div></div>
+          <div style="flex:1;max-width:220px"><input type="text" class="note-in" placeholder="จดไว้..." value="${c.notes[i]}" oninput="setNote('${c.id}',${i},this.value)"></div>
+        </div>
+        ${sd.isHO ? `<div id="skill-wrap-${c.id}-${i}">${buildHandSkillHTML(c,i)}</div>` : ''}
+        ${d14HTML}
+      </div>
+    </div>`;
+  });
+
+  var finalD14=`<div class="post-card">
+    <div class="post-head">
+      <div class="post-head-left"><div class="post-icon">📞</div>
+        <div><div class="post-title">สรุปผล D+14 ภาพรวม</div><div class="post-sub">รวมผลจากทุก Hands-on session</div></div>
+      </div><span class="d14-badge-lbl">Overall D+14</span>
+    </div>
+    <div class="post-body">
+      <div class="m-row"><div class="m-dot" style="background:var(--blue)"></div>
+        <div class="m-info"><div class="m-name">Doctor ใช้ product จริง (รวม)</div></div>
+        <div class="m-input-area"><input type="number" class="num-in" id="adopt-${c.id}" placeholder="0" min="0" max="${c.numDocs}" value="${c.adopt_count}" oninput="setField('${c.id}','adopt_count',this.value)"><span style="font-size:11px;color:var(--ink3)">/${c.numDocs}</span></div></div>
+      <div class="m-row"><div class="m-dot" style="background:var(--purple)"></div>
+        <div class="m-info"><div class="m-name">คลินิกขอนัดต่อเองไหม?</div></div>
+        <select class="sel-in" id="rep-${c.id}" onchange="setField('${c.id}','repeat_req',this.value)">
+          <option value="" ${!c.repeat_req?'selected':''}>เลือก...</option>
+          <option value="yes" ${c.repeat_req==='yes'?'selected':''}>✓ ขอเพิ่มเอง</option>
+          <option value="no" ${c.repeat_req==='no'?'selected':''}>ยังไม่ได้ขอ</option></select></div>
+      <div class="m-row"><div class="m-dot" style="background:var(--teal)"></div>
+        <div class="m-info"><div class="m-name">ส่ง first case แล้วหรือยัง?</div></div>
+        <select class="sel-in" id="fcase-${c.id}" onchange="setField('${c.id}','first_case',this.value)">
+          <option value="" ${!c.first_case?'selected':''}>เลือก...</option>
+          <option value="yes" ${c.first_case==='yes'?'selected':''}>✓ ส่งแล้ว</option>
+          <option value="no" ${c.first_case==='no'?'selected':''}>ยังไม่ส่ง</option></select></div>
+      <div class="m-row" style="border-bottom:none"><div class="m-dot" style="background:var(--amber)"></div>
+        <div class="m-info"><div class="m-name">เหตุผลที่ยังไม่ใช้</div></div>
+        <div style="flex:1;max-width:220px"><input type="text" class="note-in" id="barrier-${c.id}" placeholder="เช่น ยังไม่มีเคส..." value="${c.barrier}" oninput="setField('${c.id}','barrier',this.value)"></div></div>
+    </div></div>`;
+
+  function barHTML(pct,col){
+    if(pct===null) return '<span style="font-size:10.5px;color:var(--ink4)">รอข้อมูล</span>';
+    return `<div style="display:flex;align-items:center;gap:7px"><div class="sr-bar-wrap"><div class="sr-bar" style="width:${Math.round(pct)}%;background:${col}"></div></div><span class="sr-pct" style="color:${col}">${Math.round(pct)}%</span></div>`;
+  }
+
+  // ── score completeness status ──
+  var hoSessions = sdefs.map(function(sd,i){return{i,isHO:sd.isHO,done:c.sessions[i].done};}).filter(function(x){return x.isHO&&x.done;});
+  var d14Filled  = hoSessions.filter(function(x){ var v=parseFloat(c.d14[x.i].adopt); return !isNaN(v)&&String(c.d14[x.i].adopt)!==''; }).length;
+  var d14Total   = hoSessions.length;
+
+  var statusBanner='';
+  if(d14Total===0){
+    // no HO session done yet
+    statusBanner='<div style="background:var(--paper);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--ink3)"><span style="font-size:16px">📋</span><div><b style="color:var(--ink2)">คะแนนยังไม่สมบูรณ์</b><br>ยังไม่มี Hands-on session ที่เทรนเสร็จ — คะแนนจะสมบูรณ์เมื่อเทรนครบและกรอก D+14</div></div>';
+  } else if(d14Filled===0){
+    statusBanner='<div style="background:var(--orange-l);border:1px solid #F5C090;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--orange)"><span style="font-size:16px">⏳</span><div><b>รอกรอก D+14 — คะแนนยังไม่ครบ 100%</b><br>Adoption (35%) ยังไม่มีข้อมูล · โทรติดตาม Doctor แล้วกรอก D+14 ใน session Hands-on ด้านบน</div></div>';
+  } else if(d14Filled<d14Total){
+    statusBanner='<div style="background:var(--amber-l);border:1px solid #F5C98A;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--amber)"><span style="font-size:16px">📋</span><div><b>D+14 บางส่วน — กรอกให้ครบเพื่อคะแนนที่แม่นยำ</b><br>กรอกแล้ว '+d14Filled+'/'+d14Total+' session · กรอกให้ครบเพื่อ avg adoption ที่ถูกต้อง</div></div>';
+  } else {
+    statusBanner='<div style="background:var(--green-l);border:1px solid #A8E4BD;border-radius:8px;padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12.5px;color:var(--green)"><span style="font-size:16px">✅</span><div><b>คะแนนสมบูรณ์ — วัดผลได้เลย</b><br>กรอก D+14 ครบทุก Hands-on session · คะแนนรวมนี้เชื่อถือได้</div></div>';
+  }
+
+  // ── consolidated follow-up alerts ──
+  var alerts = [];
+  sdefs.forEach(function(sd,i){
+    if(!sd.isHO||!c.sessions[i].done) return;
+    var ds = c.sessions[i];
+    var d  = c.d14[i];
+    if(String(d.adopt)!=='') return; // already filled
+    var fu = followUpStatus(ds.date);
+    if(!fu) return;
+    alerts.push({sessNum:sd.num, fu});
+  });
+
+  var alertsHTML='';
+  if(alerts.length){
+    var urgentAlerts = alerts.filter(function(a){return a.fu.urgent;});
+    var normalAlerts = alerts.filter(function(a){return !a.fu.urgent;});
+    var allAlerts = urgentAlerts.concat(normalAlerts);
+    var headerColor = urgentAlerts.length ? 'var(--red)' : 'var(--teal)';
+    var headerBg    = urgentAlerts.length ? 'var(--red-l)' : 'var(--teal-l)';
+    var headerBorder= urgentAlerts.length ? '#F0B4AE' : '#9FE1CB';
+    var headerIcon  = urgentAlerts.length ? '🔔' : '📅';
+    var rows = allAlerts.map(function(a){
+      return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 12px;border-bottom:1px solid rgba(0,0,0,.06)">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+          <span>${a.fu.icon}</span>
+          <span style="color:var(--ink2)"><b>${a.sessNum}</b> — Follow-up <b>${a.fu.followUpStr}</b></span>
+        </div>
+        <span style="font-size:11px;font-weight:600;color:${a.fu.color}">${a.fu.label}</span>
+      </div>`;
+    }).join('');
+    alertsHTML=`<div style="background:${headerBg};border:1.5px solid ${headerBorder};border-radius:10px;overflow:hidden;margin-bottom:12px">
+      <div style="padding:9px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid ${headerBorder}">
+        <span style="font-size:16px">${headerIcon}</span>
+        <span style="font-size:13px;font-weight:700;color:${headerColor}">แจ้งเตือน D+14 Follow-up — ยังรอกรอก ${alerts.length} session</span>
+      </div>
+      ${rows}
+    </div>`;
+  }
+
+  var summaryHTML=`${alertsHTML}<div class="summary-card">
+    <div class="summary-head"><div class="summary-title">📊 สรุปคะแนนผลการเทรน</div>
+      <span style="font-family:'DM Mono',monospace;font-size:14.5px;font-weight:700;color:${res.borderColor}">${scoreDisplay}/100</span></div>
+    <div class="summary-body">
+      <div class="score-row"><div class="sr-label">✅ เทรนครบทุก session <span style="font-size:10.5px;color:var(--ink4)">(15%) · พร้อมทันที</span></div>${barHTML(sc.compPct,'var(--blue)')}</div>
+      <div class="score-row"><div class="sr-label">📈 Doctor พัฒนา (CTS score ก่อน→หลัง) <span style="font-size:10.5px;color:var(--ink4)">(20%) · พร้อมหลังจบ session</span></div>${barHTML(sc.deltaPct,'var(--green)')}</div>
+      <div class="score-row"><div class="sr-label">⭐ Doctor พอใจ (QR star) <span style="font-size:10.5px;color:var(--ink4)">(15%) · พร้อมหลังจบ session</span></div>${barHTML(sc.avgSat,'var(--amber)')}</div>
+      <div class="score-row"><div class="sr-label">🖐 Hands-on Skill <span style="font-size:10.5px;color:var(--purple)">(20%) · Pass=100 · Cond.=60 · Re-Train=0</span></div>${barHTML(sc.skillPct,'var(--purple)')}</div>
+      <div class="score-row" style="border-bottom:none"><div class="sr-label">💉 Doctor ใช้ product จริง <span style="font-size:10.5px;color:var(--orange)">(30%) · พร้อมหลัง D+14</span></div>${barHTML(sc.adoptPct,'var(--orange)')}</div>
+    </div></div>
+  ${statusBanner}
+  <div class="action-box ${res.ab}" id="action-result"><strong>${res.icon} ${res.label}</strong> — ${res.action}</div>`;
+
+  var pkgLbl=c.pkg==='E'?'MAX-Entry':c.pkg==='A'?'MAX-A':'MAX-B';
+  main.innerHTML=`
+    <div class="clinic-header">
+      <div>
+        <div class="ch-breadcrumb">${createdInfo}</div>
+        <div class="ch-name">${c.name}</div>
+        <div class="ch-chips">
+          <span class="ch-chip chip-${c.pkg.toLowerCase()}">${pkgLbl} · ${sdefs.length} Sessions</span>
+          <span class="ch-chip chip-${c.level}">${c.level==='std'?'Standard':'Advanced'}</span>
+          <span class="ch-chip">👨‍⚕️ ${c.numDocs} Doctor</span>
+          <span class="ch-chip" style="cursor:pointer" onclick="editClinic('${c.id}')">✏️ แก้ไข</span>
+        </div>
+        ${editInfo}
+      </div>
+      <div class="ch-right">
+        <div class="score-circle" style="border-color:${res.borderColor}">
+          <div class="sc-num" style="color:${res.borderColor}">${scoreDisplay}</div>
+          <div class="sc-label">/ 100</div>
+        </div>
+        <div class="result-badge ${res.cls}">${res.label}</div>
+      </div>
+    </div>
+    <div class="ov-grid">
+      <div class="ov-card"><div class="ov-num" style="color:var(--blue)" id="ov-done">${done}/${sdefs.length}</div><div class="ov-lbl">Sessions<br>เทรนแล้ว</div></div>
+      <div class="ov-card"><div class="ov-num" style="color:var(--green)" id="ov-delta">${deltaDisplay}</div><div class="ov-lbl">CTS Score avg<br>พัฒนาขึ้น</div></div>
+      <div class="ov-card"><div class="ov-num" style="color:var(--amber)" id="ov-sat">${satDisplay}</div><div class="ov-lbl">Satisfaction<br>เฉลี่ย</div></div>
+      <div class="ov-card"><div class="ov-num" style="color:var(--orange)" id="ov-adopt">${adoptDisplay}</div><div class="ov-lbl">ใช้ product<br>D+14</div></div>
+    </div>
+    <div class="sec-lbl">บันทึกผลแต่ละ Session</div>
+    ${sessHTML}
+    <div class="sec-lbl">สรุปผล D+14 ภาพรวม</div>
+    ${finalD14}
+    <div class="sec-lbl">คะแนนรวมและสิ่งที่ต้องทำ — วัดผลสมบูรณ์หลังกรอก D+14 ครบ</div>
+    ${summaryHTML}`;
+
+  sdefs.forEach(function(_,i){
+    var el=document.getElementById('qr-'+c.id+'-'+i);
+    if(el&&el.innerHTML===''){
+      try{new QRCode(el,{text:'https://forms.gle/CTS-'+c.id+'-S'+(i+1),width:58,height:58,correctLevel:QRCode.CorrectLevel.M});}
+      catch(e){el.innerHTML='<div style="width:58px;height:58px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border-radius:4px;font-size:9px;color:#999;text-align:center">QR<br>Code</div>';}
+    }
+  });
+}
+
+/* ═══ ACTIONS ═══ */
+function markEdit(cid){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  if(currentUser){ c.lastEditBy=currentUser.name; c.lastEditAt=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}); }
+}
+function toggleSess(cid,idx){
+  var body=document.getElementById('sb-'+cid+'-'+idx);
+  var head=document.querySelector('#sc-'+cid+'-'+idx+' .sess-head');
+  if(!body) return;
+  var open=body.classList.contains('open');
+  body.classList.toggle('open',!open);
+  if(head) head.classList.toggle('open',!open);
+}
+function toggleDone(cid,idx){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.sessions[idx].done=!c.sessions[idx].done;
+  markEdit(cid);
+  var chk=document.querySelector('#sc-'+cid+'-'+idx+' .sess-check');
+  if(chk){chk.classList.toggle('done',c.sessions[idx].done);chk.textContent=c.sessions[idx].done?'✓':'';}
+  if(c.sessions[idx].done){var body=document.getElementById('sb-'+cid+'-'+idx);if(body)body.classList.add('open');}
+  saveToStorage(); refreshOverview(cid);
+}
+function setDate(cid,idx,val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.sessions[idx].date=val; markEdit(cid); saveToStorage();
+  var chip=document.querySelector('#sc-'+cid+'-'+idx+' .sess-date-chip');
+  if(chip) chip.textContent=val;
+}
+function setStar(cid,idx,val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.sat_stars[idx]=val; c.sat_count[idx]=Math.max(c.sat_count[idx],1); markEdit(cid);
+  var el=document.getElementById('stars-'+cid+'-'+idx);
+  if(el){var h='';for(var s=1;s<=5;s++)h+='<button class="star-btn" onclick="setStar(\''+cid+'\','+idx+','+s+')">'+(val>=s?'⭐':'☆')+'</button>';el.innerHTML=h;}
+  var a=document.getElementById('star-avg-'+cid+'-'+idx);if(a)a.textContent=val+'.0★';
+  var cnt=document.getElementById('star-count-'+cid+'-'+idx);if(cnt)cnt.textContent='('+c.sat_count[idx]+' คนตอบ)';
+  saveToStorage(); refreshOverview(cid);
+}
+function setNote(cid,idx,val){var c=clinics.find(function(x){return x.id===cid});if(c){c.notes[idx]=val;markEdit(cid);saveToStorage();}}
+function setD14(cid,idx,field,val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c.d14[idx][field]=val; markEdit(cid); saveToStorage(); refreshOverview(cid);
+}
+function setField(cid,field,val){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c) return;
+  c[field]=val; markEdit(cid); saveToStorage(); refreshOverview(cid);
+}
+function refreshOverview(cid){
+  var c=clinics.find(function(x){return x.id===cid});
+  if(!c||cid!==activeId) return;
+  var sc=calcScore(c),res=resultInfo(sc.total);
+  var scoreDisplay=sc.total===null?'–':sc.total;
+  var done=c.sessions.filter(function(s){return s.done}).length;
+  var sdefs=c.sdefs;
+  var circle=document.querySelector('.score-circle');
+  if(circle){circle.style.borderColor=res.borderColor;circle.querySelector('.sc-num').style.color=res.borderColor;circle.querySelector('.sc-num').textContent=scoreDisplay;}
+  var badge=document.querySelector('.result-badge');
+  if(badge){badge.className='result-badge '+res.cls;badge.textContent=res.label;}
+  var ovDone=document.getElementById('ov-done');if(ovDone)ovDone.textContent=done+'/'+sdefs.length;
+  var satAvg=[];for(var i=0;i<sdefs.length;i++){if(c.sessions[i].done&&c.sat_stars[i]>0)satAvg.push(c.sat_stars[i]);}
+  var satDisplay=satAvg.length?(satAvg.reduce(function(a,b){return a+b},0)/satAvg.length).toFixed(1)+'★':'–';
+  var ovSat=document.getElementById('ov-sat');if(ovSat)ovSat.textContent=satDisplay;
+  var deltaDisplay=sc.avgDelta!==null?(sc.avgDelta>0?'+':'')+sc.avgDelta.toFixed(1):'–';
+  var ovDelta=document.getElementById('ov-delta');if(ovDelta)ovDelta.textContent=deltaDisplay;
+  var adoptN=parseFloat(c.adopt_count);
+  var ovAdopt=document.getElementById('ov-adopt');if(ovAdopt)ovAdopt.textContent=isNaN(adoptN)?'–':adoptN+'/'+c.numDocs+' คน';
+  var ab=document.querySelector('.action-box');
+  if(ab){ab.className='action-box '+res.ab;ab.innerHTML='<strong>'+res.icon+' '+res.label+'</strong> — '+res.action;}
+  renderSidebar();
+}
+
+/* ═══ MODAL ═══ */
+function onPkgChange(){
+  var pkg=document.getElementById('m-pkg').value;
+  document.getElementById('pkg-note').textContent=PKG_NOTES[pkg]||'';
+  document.getElementById('m-sess-wrap').style.display=pkg==='B'?'block':'none';
+}
+function openModal(){
+  document.getElementById('modal-mode').value='add';
+  document.getElementById('modal-title').textContent='เพิ่มคลินิกใหม่';
+  document.getElementById('modal-sub').textContent='กรอกข้อมูลเบื้องต้นของคลินิก';
+  document.getElementById('m-name').value='';
+  document.getElementById('m-pkg').value='A';
+  document.getElementById('m-level').value='std';
+  document.getElementById('m-docs').value='2';
+  document.getElementById('m-cts').value='V';
+  document.getElementById('m-date').value='';
+  document.getElementById('m-sess').value='4';
+  document.getElementById('delete-btn').style.display='none';
+  onPkgChange();
+  document.getElementById('modal-overlay').classList.add('show');
+  setTimeout(function(){document.getElementById('m-name').focus()},200);
+}
+function editClinic(id){
+  var c=clinics.find(function(x){return x.id===id});
+  if(!c) return;
+  document.getElementById('modal-mode').value='edit';
+  document.getElementById('modal-cid').value=id;
+  document.getElementById('modal-title').textContent='แก้ไขข้อมูลคลินิก';
+  document.getElementById('modal-sub').textContent=c.name;
+  document.getElementById('m-name').value=c.name;
+  document.getElementById('m-pkg').value=c.pkg;
+  document.getElementById('m-level').value=c.level;
+  document.getElementById('m-docs').value=c.numDocs;
+  document.getElementById('m-cts').value=c.ctsTeam;
+  document.getElementById('m-date').value=c.startDate||'';
+  document.getElementById('m-sess').value=c.numSess||4;
+  document.getElementById('delete-btn').style.display='inline-flex';
+  onPkgChange();
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
+function saveClinic(){
+  var name=document.getElementById('m-name').value.trim();
+  if(!name){alert('กรุณากรอกชื่อคลินิก');return;}
+  var pkg=document.getElementById('m-pkg').value;
+  var numSess=pkg==='B'?Math.min(6,Math.max(4,parseInt(document.getElementById('m-sess').value)||4)):pkg==='E'?1:3;
+  var mode=document.getElementById('modal-mode').value;
+  if(mode==='edit'){
+    var cid=document.getElementById('modal-cid').value;
+    var c=clinics.find(function(x){return x.id===cid});
+    if(c){c.name=name;c.ctsTeam=document.getElementById('m-cts').value;c.startDate=document.getElementById('m-date').value;c.numDocs=parseInt(document.getElementById('m-docs').value)||1;markEdit(cid);}
+  }else{
+    var createdBy=currentUser?currentUser.name:'';
+    var c=mkClinic(name,pkg,numSess,document.getElementById('m-level').value,document.getElementById('m-docs').value,document.getElementById('m-cts').value,document.getElementById('m-date').value,createdBy);
+    clinics.push(c);
+    closeModal();
+    saveToStorage();
+    renderSidebar();
+    selectClinic(c.id);
+    return;
+  }
+  closeModal();
+  saveToStorage();
+  renderSidebar();
+  if(activeId) selectClinic(activeId);
+}
+function deleteClinic(){
+  if(!confirm('ลบคลินิกนี้ออกจากระบบ?')) return;
+  var cid=document.getElementById('modal-cid').value;
+  clinics=clinics.filter(function(x){return x.id!==cid});
+  closeModal(); saveToStorage(); activeId=null; renderSidebar();
+  document.getElementById('main').innerHTML='<div class="empty-state"><div class="es-icon">🏥</div><div class="es-title">เลือกคลินิกจากรายการ</div><div class="es-desc">หรือกด "+ เพิ่มคลินิกใหม่"</div></div>';
+}
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal();});
+document.getElementById('user-overlay').addEventListener('click',function(e){if(e.target===this)closeUserModal();});
+
+/* ═══ DATE ═══ */
+var now=new Date();
+var thDays=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+var thMonths=['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+document.getElementById('today-date').textContent='วัน'+thDays[now.getDay()]+' '+now.getDate()+' '+thMonths[now.getMonth()]+' '+(now.getFullYear()+543);
+
+/* ═══ INIT ═══ */
+function init(){
+  document.getElementById('ls-text').textContent='กำลังโหลดข้อมูล...';
+  loadFromGAS();
+
+  // restore user
+  var savedId=loadUserPref();
+  if(savedId){
+    var u=TEAM.find(function(x){return x.id===savedId});
+    if(u) setUser(u);
+  }
+
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('app').style.display='grid';
+  renderSidebar();
+
+  if(!currentUser){
+    setTimeout(openUserModal, 400);
+  }
+
+  // sync across tabs — when another tab saves, reload local copy
+  window.addEventListener('storage', function(e){
+    if(e.key===STORAGE_KEY){
+      _loadFromLocal();
+      renderSidebar();
+      if(activeId){
+        var c=clinics.find(function(x){return x.id===activeId});
+        if(c) selectClinic(activeId);
+      }
+    }
+  });
+}
+
+init();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('./sw.js').catch(function(e){ console.log('SW:', e); });
+  });
+}
+</script>
+</body>
+</html>
