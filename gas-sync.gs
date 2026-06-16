@@ -1,11 +1,10 @@
 // ════════════════════════════════════════════════
 //  CTS Training Tracker — GAS Sync Backend
-//  วิธีใช้:
-//  1. เปิด Google Apps Script ที่ deploy ไว้
-//  2. แทนที่ code ทั้งหมดด้วยไฟล์นี้
-//  3. กด Deploy > Manage deployments > Edit (ดินสอ)
+//  วิธี redeploy:
+//  1. แทนที่ code ทั้งหมดใน Apps Script ด้วยไฟล์นี้
+//  2. Deploy > Manage deployments > Edit (ดินสอ)
 //     > Version: New version > Deploy
-//  ไม่ต้องเปลี่ยน URL — URL เดิมใช้ได้ต่อ
+//  URL เดิมใช้ได้ต่อ ไม่ต้องแก้ในแอป
 // ════════════════════════════════════════════════
 
 var SPREADSHEET_ID = '1u53rZoP87tO2CiZTD7WugV2SE2zpQn7itPZivnddmUQ';
@@ -17,17 +16,23 @@ function doGet(e) {
 
 function doPost(e) {
   try {
-    var body = JSON.parse(e.postData.contents);
+    var payload;
+    // รับได้ทั้ง form POST (e.parameter.payload) และ raw JSON POST (e.postData.contents)
+    if (e.parameter && e.parameter.payload) {
+      payload = JSON.parse(e.parameter.payload);
+    } else {
+      payload = JSON.parse(e.postData.contents);
+    }
+
     var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
     var sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
-
-    sh.getRange('A1').setValue(body.data);
-    sh.getRange('B1').setValue(body.ts);
+    sh.getRange('A1').setValue(payload.data);
+    sh.getRange('B1').setValue(payload.ts);
     sh.getRange('C1').setValue(new Date().toISOString());
-    sh.getRange('D1').setValue(body.user || 'unknown');
+    sh.getRange('D1').setValue(payload.user || 'unknown');
 
     return ContentService
-      .createTextOutput(JSON.stringify({ status: 'ok', ts: body.ts }))
+      .createTextOutput(JSON.stringify({ status: 'ok', ts: payload.ts }))
       .setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService
