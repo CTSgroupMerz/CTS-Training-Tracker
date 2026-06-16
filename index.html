@@ -640,23 +640,14 @@ function _syncToGAS(ts){
   .catch(function(){ showSyncStatus('offline'); });
 }
 
-function loadFromGAS(cb){
-  if(!GAS_URL){ _loadFromLocal(); if(cb) cb(); return; }
+function loadFromGAS(){
+  if(!GAS_URL){ showSyncStatus('synced'); return; }
   showSyncStatus('loading');
-  var _done=false;
-  function _finish(ok){
-    if(_done) return; _done=true;
-    if(!ok) _loadFromLocal();
-    if(cb) cb();
-  }
-  var _timer=setTimeout(function(){ showSyncStatus('offline'); _finish(false); }, 6000);
   fetch(GAS_URL+'?t='+Date.now())
   .then(function(r){ return r.json(); })
   .then(function(res){
-    clearTimeout(_timer);
     var localTs=parseInt(localStorage.getItem(STORAGE_KEY+'_ts')||0);
     var gasTs=parseInt(res.ts||0);
-    var ok=false;
     if(gasTs>localTs && res.data){
       try{
         var parsed=JSON.parse(res.data);
@@ -664,15 +655,17 @@ function loadFromGAS(cb){
           clinics=parsed; _migrateClinics();
           localStorage.setItem(STORAGE_KEY,res.data);
           localStorage.setItem(STORAGE_KEY+'_ts',gasTs);
-          ok=true;
+          renderSidebar();
+          if(activeId){
+            var ac=clinics.find(function(x){return x.id===activeId});
+            if(ac) renderClinic(ac);
+          }
         }
       }catch(ex){ console.log('GAS parse error',ex); }
     }
-    if(!ok) _loadFromLocal(); // always ensure clinics populated
     showSyncStatus('synced');
-    _finish(true);
   })
-  .catch(function(){ clearTimeout(_timer); showSyncStatus('offline'); _finish(false); });
+  .catch(function(){ showSyncStatus('offline'); });
 }
 
 function _migrateClinics(){
@@ -1558,17 +1551,18 @@ document.getElementById('today-date').textContent='วัน'+thDays[now.getDay(
 
 /* ═══ INIT ═══ */
 function init(){
-  document.getElementById('ls-text').textContent='กำลังโหลดข้อมูล...';
+  document.getElementById('ls-text').textContent='กำลังโหลด...';
 
   var savedId=loadUserPref();
   if(savedId){ var u=TEAM.find(function(x){return x.id===savedId}); if(u) setUser(u); }
 
-  loadFromGAS(function(){
-    document.getElementById('loading-screen').classList.add('hidden');
-    document.getElementById('app').style.display = isMob() ? 'block' : 'grid';
-    renderSidebar();
-    if(!currentUser) setTimeout(openUserModal, 400);
-  });
+  // แสดงแอปทันทีด้วย localStorage → GAS sync ทำงาน background
+  _loadFromLocal();
+  document.getElementById('loading-screen').classList.add('hidden');
+  document.getElementById('app').style.display = isMob() ? 'block' : 'grid';
+  renderSidebar();
+  if(!currentUser) setTimeout(openUserModal, 400);
+  loadFromGAS(); // background sync, ไม่บล็อก UI
 
   // sync across tabs — when another tab saves, reload local copy
   window.addEventListener('storage', function(e){
