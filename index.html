@@ -17,15 +17,15 @@
 :root {
   /* ── DESIGN SYSTEM TOKENS (DESIGN-figma.md) ── */
   /* LIGHT THEME — softened: warm cream canvas, gentle pastel accents, soft ink */
-  --ink:#262521;--ink2:#56544c;--ink3:#8c897f;--ink4:#c4c1b6;
-  --paper:#f4f2ec;--surface:#ece9e0;--white:#fffdf8;--border:#e4e0d6;--border2:#d6d1c4;
-  --sidebar:#efece4;
-  --canvas:#fffdf8;--surface-soft:#f1eee6;--hairline:#e4e0d6;--hairline-soft:#efece4;
+  --ink:#2D1B4E;--ink2:#6B4F8A;--ink3:#9B7EB8;--ink4:#D4B8E8;
+  --paper:#FDF8FF;--surface:#F5EDFF;--white:#FEFCFF;--border:#EDD9FF;--border2:#DEC0F5;
+  --sidebar:#FAF4FF;
+  --canvas:#FEFCFF;--surface-soft:#F3EAFF;--hairline:#EDD9FF;--hairline-soft:#F5EDFF;
   --topbar-h:54px;
   /* pastel color-blocks */
   --block-lime:#dceeb1;--block-lilac:#c5b0f4;--block-cream:#f4ecd6;
   --block-pink:#efd4d4;--block-mint:#c8e6cd;--block-coral:#f3c9b6;--block-navy:#1f1d3d;
-  --accent-magenta:#ff3d8b;
+  --accent-magenta:#C084FC;
   /* radius scale */
   --r-xs:2px;--r-sm:6px;--r-md:8px;--r-lg:24px;--r-xl:32px;--r-pill:50px;--r-full:9999px;
   /* spacing scale (8px base) */
@@ -33,23 +33,23 @@
   /* elevation */
   --shadow-1:0 4px 16px rgba(0,0,0,.06);
   /* functional / semantic data colors (kept for information design) */
-  --blue:#1A5FA8;--blue-l:#EAF3FC;--blue-p:#F4F9FE;
-  --teal:#0B6B52;--teal-l:#E5F5EE;--teal-p:#F2FAF6;
-  --amber:#B85C00;--amber-l:#FEF0DC;
-  --green:#1ea64a;--green-l:#E6F5EC;
-  --red:#C0392B;--red-l:#FDECEA;
-  --purple:#4A3DB5;--purple-l:#EDEBFB;
-  --orange:#C05000;--orange-l:#FFF0E0;
-  --entry:#6B3FB5;--entry-l:#F0EAFF;
+  --blue:#6D28D9;--blue-l:#EDE9FE;--blue-p:#F5F3FF;
+  --teal:#0F766E;--teal-l:#CCFBF1;--teal-p:#F0FDFA;
+  --amber:#B45309;--amber-l:#FEF3C7;
+  --green:#16A34A;--green-l:#DCFCE7;
+  --red:#BE123C;--red-l:#FFE4E8;
+  --purple:#7C3AED;--purple-l:#EDE9FE;
+  --orange:#C2410C;--orange-l:#FFF7ED;
+  --entry:#9333EA;--entry-l:#F3E8FF;
   --transition:all .18s cubic-bezier(.4,0,.2,1);
 }
 /* ── DARK THEME — comfortable charcoal/navy, soft white ink ── */
 [data-theme="dark"]{
-  --ink:#ecebe5;--ink2:#bcbab0;--ink3:#8a887e;--ink4:#5c5c53;
-  --paper:#15151a;--surface:#2a2a34;--white:#21212a;--border:#34343f;--border2:#41414d;
-  --sidebar:#1b1b22;
-  --canvas:#21212a;--surface-soft:#24242d;--hairline:#34343f;--hairline-soft:#2a2a34;
-  --shadow-1:0 4px 16px rgba(0,0,0,.4);
+  --ink:#F0E8FF;--ink2:#C9AEED;--ink3:#9370C4;--ink4:#5E3D8A;
+  --paper:#1A1225;--surface:#261840;--white:#201535;--border:#3D2464;--border2:#4E2E80;
+  --sidebar:#1D1530;
+  --canvas:#201535;--surface-soft:#231740;--hairline:#3D2464;--hairline-soft:#261840;
+  --shadow-1:0 4px 16px rgba(0,0,0,.5);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -97,7 +97,7 @@ body{font-family:'Inter','Sarabun',sans-serif;background:var(--paper);color:var(
 .sync-btn:hover{background:var(--border);color:var(--ink)}
 .sync-btn:disabled{opacity:.3;cursor:default}
 .sync-btn.spinning{animation:spin .7s linear infinite}
-.sync-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#34D399;animation:pulse 2s infinite}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .sb-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;padding:10px 14px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);width:100%;background:transparent;cursor:pointer;font-family:inherit;transition:background .15s}
 .sb-stats:hover{background:var(--surface)}
@@ -110,11 +110,11 @@ body{font-family:'Inter','Sarabun',sans-serif;background:var(--paper);color:var(
 .sb-search{padding:8px 10px 2px}
 .sb-search input{width:100%;border:1.5px solid var(--border);border-radius:var(--r-pill);background:var(--canvas);color:var(--ink);font-family:'Inter','Sarabun',sans-serif;font-size:12.5px;padding:8px 14px;outline:none;transition:border-color .15s}
 .sb-search input::placeholder{color:var(--ink3)}
-.sb-search input:focus{border-color:var(--blue)}
+.sb-search input:focus{border-color:#C084FC}
 .clinic-list{padding:0 8px;flex:1;overflow-y:auto}
 .clinic-btn{width:100%;text-align:left;padding:9px 11px;border-radius:var(--r-md);border:none;background:transparent;cursor:pointer;transition:background .12s,box-shadow .12s;color:var(--ink2);font-family:'Inter','Sarabun',sans-serif;font-size:13px;display:flex;align-items:center;gap:9px;margin-bottom:2px}
 .clinic-btn:hover{background:var(--surface);color:var(--ink)}
-.clinic-btn.active{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.clinic-btn.active{background:var(--surface);color:var(--ink);box-shadow:inset 0 0 0 1.5px #C084FC}
 .cb-avatar{width:32px;height:32px;border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
 .cb-info{flex:1;min-width:0}
 .cb-name{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
@@ -128,7 +128,7 @@ body{font-family:'Inter','Sarabun',sans-serif;background:var(--paper);color:var(
 .cbs-amber{background:var(--amber-l);color:var(--amber)}
 .cbs-red{background:var(--red-l);color:var(--red)}
 .session-progress{margin-top:3px;height:2px;background:var(--border);border-radius:1px;overflow:hidden}
-.sp-fill{height:100%;border-radius:1px;background:var(--ink4);transition:width .3s}
+.sp-fill{height:100%;border-radius:1px;background:#C084FC;transition:width .3s}
 .add-btn{margin:8px 8px 0;padding:10px 11px;border-radius:var(--r-pill);border:1.5px dashed var(--border2);background:transparent;color:var(--ink3);font-family:'Inter','Sarabun',sans-serif;font-size:13px;cursor:pointer;width:calc(100% - 16px);text-align:center;transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:6px}
 .add-btn:hover{border-color:var(--ink);color:var(--ink);background:var(--surface)}
 .sb-footer{padding:12px 14px;border-top:1px solid var(--border);margin-top:auto}
@@ -159,14 +159,22 @@ body{font-family:'Inter','Sarabun',sans-serif;background:var(--paper);color:var(
 .dbc-name{flex:1;font-size:10px;color:var(--ink2);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 /* Filter chips */
 .dash-filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.dash-daterange{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.dr-label{font-size:12px;font-weight:600;color:var(--ink3);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+.dr-input{border:1.5px solid var(--border2);border-radius:var(--r-pill);background:var(--canvas);color:var(--ink);font-family:'Inter','Sarabun',sans-serif;font-size:12px;padding:5px 12px;outline:none;cursor:pointer;transition:border-color .15s}
+.dr-input:focus{border-color:var(--blue)}
+.dr-sep{font-size:12px;color:var(--ink3)}
+.dr-clear{padding:5px 12px;border-radius:var(--r-pill);border:1.5px solid var(--border2);background:transparent;color:var(--ink3);font-size:12px;cursor:pointer;font-family:'Inter','Sarabun',sans-serif;transition:var(--transition)}
+.dr-clear:hover{border-color:var(--red);color:var(--red)}
+@media(max-width:767px){.dash-daterange{gap:6px}.dr-input{font-size:11px;padding:5px 10px}.dr-label{width:100%}}
 .dash-chip{padding:5px 13px;border-radius:var(--r-pill);border:1.5px solid var(--border2);background:var(--canvas);color:var(--ink2);font-size:12px;font-family:'Inter','Sarabun',sans-serif;cursor:pointer;transition:var(--transition);font-weight:500}
 .dash-chip:hover{border-color:var(--blue);color:var(--blue);transform:translateY(-1px)}
-.dash-chip.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(26,95,168,.3)}
+.dash-chip.active{background:#9333EA;border-color:#9333EA;color:#fff;box-shadow:0 2px 8px rgba(147,51,234,.3)}
 .dash-chip-sep{width:1px;background:var(--border2);margin:0 2px;border:none}
 /* Tabs */
 .dash-tabs{display:flex;gap:2px;background:var(--border);padding:3px;border-radius:10px;margin-bottom:18px;width:fit-content}
 .dash-tab{padding:6px 16px;border-radius:8px;border:none;background:transparent;font-family:'Inter','Sarabun',sans-serif;font-size:13px;font-weight:600;color:var(--ink3);cursor:pointer;transition:all .15s}
-.dash-tab.active{background:white;color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.dash-tab.active{background:#FEFCFF;color:#7C3AED;box-shadow:0 1px 4px rgba(0,0,0,.1)}
 /* Status section */
 .dash-status-section{margin-bottom:16px;border-radius:12px;overflow:hidden;border:1.5px solid var(--border)}
 .dash-status-head{padding:10px 16px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px}
@@ -410,15 +418,15 @@ select.sel-in:focus{border-color:var(--blue);background:var(--canvas)}
 .f-label{font-size:11.5px;font-weight:600;color:var(--ink2);margin-bottom:4px;margin-top:14px;display:block}
 .f-label:first-of-type{margin-top:0}
 input[type=text].f-in{width:100%;border:1.5px solid var(--border);border-radius:7px;font-family:'Inter','Sarabun',sans-serif;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 11px;transition:border-color .15s}
-input[type=text].f-in:focus{border-color:var(--blue);background:var(--canvas)}
+input[type=text].f-in:focus{border-color:#C084FC;background:var(--canvas)}
 input[type=number].f-in-n{border:1.5px solid var(--border);border-radius:7px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 11px;width:100%;transition:border-color .15s}
-input[type=number].f-in-n:focus{border-color:var(--blue);background:var(--canvas)}
+input[type=number].f-in-n:focus{border-color:#C084FC;background:var(--canvas)}
 select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-family:'Inter','Sarabun',sans-serif;font-size:13.5px;color:var(--ink);background:var(--paper);outline:none;padding:7px 9px;cursor:pointer}
 .f-row{display:grid;grid-template-columns:1fr 1fr;gap:11px}
 .modal-btns{display:flex;gap:7px;margin-top:18px;justify-content:flex-end}
 .btn{padding:9px 22px;border-radius:var(--r-pill);border:1.5px solid;font-family:'Inter','Sarabun',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;transition:var(--transition)}
 .btn:active{transform:translateY(1px) scale(.98)}
-.btn-primary{background:var(--ink);border-color:var(--ink);color:var(--white);box-shadow:0 2px 10px rgba(0,0,0,.16)}
+.btn-primary{background:#9333EA;border-color:#9333EA;color:#FEFCFF;box-shadow:0 2px 10px rgba(147,51,234,.3)}
 .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.22)}
 .btn-ghost{background:transparent;border-color:var(--border2);color:var(--ink2)}
 .btn-ghost:hover{border-color:var(--ink);color:var(--ink);background:var(--surface)}
@@ -431,8 +439,8 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 .user-modal{background:var(--white);border-radius:var(--r-lg);padding:26px;width:400px;max-width:92vw}
 .user-list{display:flex;flex-direction:column;gap:8px;margin:14px 0}
 .user-btn{padding:11px 16px;border-radius:9px;border:1.5px solid var(--border);background:var(--paper);cursor:pointer;text-align:left;transition:all .15s;font-family:'Inter','Sarabun',sans-serif}
-.user-btn:hover{border-color:var(--blue-l);background:var(--blue-l)}
-.user-btn.selected{border-color:var(--blue);background:var(--blue-l)}
+.user-btn:hover{border-color:var(--entry-l);background:var(--entry-l)}
+.user-btn.selected{border-color:var(--entry);background:var(--entry-l)}
 .ub-uname{font-size:13px;font-weight:600;color:var(--ink)}
 .ub-umeta{font-size:11px;color:var(--ink3);margin-top:1px}
 
@@ -516,6 +524,20 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
   .dash-tabs{width:100%}
   .dash-tab{flex:1;text-align:center;padding:6px 8px}
 }
+#guest-toast{
+  position:fixed;bottom:24px;left:50%;
+  transform:translateX(-50%) translateY(12px);
+  background:var(--ink);color:var(--white);
+  font-size:12.5px;font-weight:600;
+  padding:10px 20px;border-radius:var(--r-pill);
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  z-index:500;opacity:0;pointer-events:none;
+  transition:opacity .2s,transform .2s;white-space:nowrap;
+}
+#guest-toast.show{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
+#login-form-wrap .f-label:first-of-type{ margin-top:0; }
 </style>
 </head>
 <body>
@@ -654,11 +676,56 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
 <!-- USER SELECT MODAL -->
 <div class="overlay" id="user-overlay">
   <div class="user-modal">
-    <div class="modal-title">เลือกตัวคุณในทีม</div>
-    <div class="modal-sub">ข้อมูลจะแสดงว่าใครเป็นคนบันทึก</div>
-    <div class="user-list" id="user-list"></div>
-    <div class="modal-btns">
-      <button class="btn btn-ghost" onclick="closeUserModal()">ยกเลิก</button>
+    <div class="modal-title" id="login-title">เข้าสู่ระบบ</div>
+    <div class="modal-sub" id="login-sub">
+      CTS Training Tracker · ทีม MA
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div id="login-form-wrap">
+      <label class="f-label" style="margin-top:0">ชื่อผู้ใช้</label>
+      <input type="text" class="f-in" id="login-username"
+             placeholder="กรอก username"
+             autocomplete="username"
+             onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+
+      <label class="f-label">รหัสผ่าน</label>
+      <div style="position:relative">
+        <input type="password" class="f-in" id="login-password"
+               placeholder="กรอกรหัสผ่าน"
+               autocomplete="current-password"
+               onkeydown="if(event.key==='Enter')submitLogin()"
+               style="padding-right:40px">
+        <button onclick="togglePwVis()" id="pw-eye"
+          style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+                 background:none;border:none;cursor:pointer;font-size:16px;
+                 color:var(--ink3);padding:4px">👁</button>
+      </div>
+
+      <div id="login-error"
+           style="display:none;margin-top:10px;padding:9px 13px;
+                  border-radius:var(--r-md);background:var(--red-l);
+                  color:var(--red);font-size:12.5px;font-weight:600">
+        ❌ username หรือรหัสผ่านไม่ถูกต้อง
+      </div>
+
+      <div class="modal-btns" style="margin-top:16px">
+        <button class="btn btn-ghost" onclick="enterGuestMode()">
+          👁️ เข้าดูเป็น Guest
+        </button>
+        <button class="btn btn-primary" id="login-btn"
+                onclick="submitLogin()">
+          เข้าสู่ระบบ
+        </button>
+      </div>
+    </div>
+
+    <!-- LOADING STATE -->
+    <div id="login-loading"
+         style="display:none;text-align:center;padding:20px 0;
+                color:var(--ink3);font-size:13px">
+      <div class="ls-spinner" style="margin:0 auto 10px"></div>
+      กำลังตรวจสอบ...
     </div>
   </div>
 </div>
@@ -669,7 +736,7 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
     <div class="modal-title">ผู้พัฒนาระบบ</div>
     <div class="modal-sub">ทีมออกแบบและพัฒนา CTS Tracker</div>
     <div class="cred-list">
-      <div class="cred-item"><div class="cred-name">Nisalux Preedakron</div><div class="cred-role">ผู้ออกแบบและพัฒนาระบบ</div></div>
+      <div class="cred-item"><div class="cred-name">Nisalux Preedakorn</div><div class="cred-role">ผู้ออกแบบและพัฒนาระบบ</div></div>
       <div class="cred-item"><div class="cred-name">Potchara Preedakorn</div><div class="cred-role">ผู้ร่วมพัฒนาระบบ</div></div>
     </div>
     <div class="modal-btns">
@@ -697,7 +764,11 @@ var GAS_URL = 'https://script.google.com/macros/s/AKfycbxWAt8gNsTkCwcmfmtTBAvkE-
 var _syncTimer = null;
 var clinics = [];
 var activeId = null;
-var currentUser = null;
+var currentUser  = null;
+var authToken    = null;   // UUID จาก GAS
+var isGuestMode  = false;
+var AUTH_TOKEN_KEY = 'cts_auth_token';
+var AUTH_USER_KEY  = 'cts_auth_user';
 var clinicFilter = 'all'; // 'all' | 'mine'
 var clinicSearch = '';
 
@@ -924,23 +995,195 @@ function setUser(user){
   renderSidebar();
 }
 
-function openUserModal(){
-  var list = document.getElementById('user-list');
-  list.innerHTML = '';
-  TEAM.forEach(function(u){
-    var btn = document.createElement('button');
-    btn.className = 'user-btn' + (currentUser && currentUser.id===u.id ? ' selected' : '');
-    btn.innerHTML = '<div class="ub-uname">'+u.avatar+' '+u.name+'</div>';
-    btn.onclick = function(){
-      setUser(u);
-      closeUserModal();
-      if(!currentUser) document.getElementById('user-overlay').classList.remove('show');
-    };
-    list.appendChild(btn);
-  });
-  document.getElementById('user-overlay').classList.add('show');
+/* ── AUTH HELPERS ── */
+function isGuest(){ return isGuestMode; }
+
+function guardEdit(){
+  if(!isGuestMode) return false;
+  var t=document.getElementById('guest-toast');
+  if(t){ clearTimeout(t._h);
+    t.classList.add('show');
+    t._h=setTimeout(function(){t.classList.remove('show');},2800);
+  }
+  return true;
 }
-function closeUserModal(){ document.getElementById('user-overlay').classList.remove('show'); }
+
+function togglePwVis(){
+  var inp=document.getElementById('login-password');
+  var btn=document.getElementById('pw-eye');
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else { inp.type='password'; btn.textContent='👁'; }
+}
+
+/* ── OPEN / CLOSE LOGIN MODAL ── */
+function openUserModal(){
+  // reset form
+  document.getElementById('login-username').value='';
+  document.getElementById('login-password').value='';
+  document.getElementById('login-error').style.display='none';
+  document.getElementById('login-form-wrap').style.display='block';
+  document.getElementById('login-loading').style.display='none';
+  document.getElementById('login-btn').disabled=false;
+  document.getElementById('user-overlay').classList.add('show');
+  setTimeout(function(){
+    document.getElementById('login-username').focus();
+  },200);
+}
+function closeUserModal(){
+  document.getElementById('user-overlay').classList.remove('show');
+}
+
+/* ── SUBMIT LOGIN ── */
+function submitLogin(){
+  var username=document.getElementById('login-username').value.trim();
+  var password=document.getElementById('login-password').value;
+  if(!username||!password){
+    document.getElementById('login-error').style.display='block';
+    document.getElementById('login-error').textContent='❌ กรุณากรอก username และรหัสผ่าน';
+    return;
+  }
+  // show loading
+  document.getElementById('login-form-wrap').style.display='none';
+  document.getElementById('login-loading').style.display='block';
+
+  fetch(GAS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({ action:'login', username:username, password:password })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(res.ok){
+      authToken   = res.token;
+      isGuestMode = false;
+      try{
+        localStorage.setItem(AUTH_TOKEN_KEY, res.token);
+        localStorage.setItem(AUTH_USER_KEY,
+          JSON.stringify({ id: res.username, name: res.displayName, avatar:'👤' }));
+      }catch(e){}
+      var u={ id:res.username, name:res.displayName, avatar:'👤' };
+      closeUserModal();
+      setUser(u);
+      applyAuthUI();
+    } else {
+      document.getElementById('login-form-wrap').style.display='block';
+      document.getElementById('login-loading').style.display='none';
+      document.getElementById('login-error').style.display='block';
+      document.getElementById('login-error').textContent='❌ username หรือรหัสผ่านไม่ถูกต้อง';
+    }
+  })
+  .catch(function(){
+    document.getElementById('login-form-wrap').style.display='block';
+    document.getElementById('login-loading').style.display='none';
+    document.getElementById('login-error').style.display='block';
+    document.getElementById('login-error').textContent='❌ ไม่สามารถเชื่อมต่อได้ ลองใหม่อีกครั้ง';
+  });
+}
+
+/* ── GUEST MODE ── */
+function enterGuestMode(){
+  isGuestMode  = true;
+  authToken    = null;
+  currentUser  = null;
+  try{
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+  }catch(e){}
+  closeUserModal();
+  applyAuthUI();
+  renderSidebar();
+}
+
+/* ── LOGOUT ── */
+function logout(){
+  authToken    = null;
+  currentUser  = null;
+  isGuestMode  = false;
+  try{
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    localStorage.removeItem(AUTH_USER_KEY);
+  }catch(e){}
+  applyAuthUI();
+  // clear main
+  document.getElementById('main').innerHTML=
+    '<div class="empty-state"><div class="es-icon">🔒</div>'
+    +'<div class="es-title">กรุณา Login ก่อนใช้งาน</div></div>';
+  renderSidebar();
+  openUserModal();
+}
+
+/* ── APPLY AUTH UI ── */
+function applyAuthUI(){
+  var banner  = document.getElementById('user-banner');
+  var ubName  = document.getElementById('ub-name');
+  var ubAvatar= document.getElementById('ub-avatar');
+  var addBtn  = document.querySelector('.add-btn');
+
+  if(isGuestMode){
+    if(banner)   banner.style.display='flex';
+    if(ubAvatar) ubAvatar.textContent='👁️';
+    if(ubName)   ubName.textContent='Guest · ดูได้อย่างเดียว';
+    if(addBtn)   addBtn.style.display='none';
+    // เปลี่ยนปุ่ม "เปลี่ยน" → "Login"
+    var cb=document.querySelector('.change-user-btn');
+    if(cb){ cb.textContent='Login'; cb.onclick=function(){isGuestMode=false;openUserModal();}; }
+  } else if(currentUser){
+    if(banner)   banner.style.display='flex';
+    if(ubAvatar) ubAvatar.textContent=currentUser.avatar||'👤';
+    if(ubName)   ubName.textContent='CTS · '+currentUser.name;
+    if(addBtn)   addBtn.style.display='';
+    var cb=document.querySelector('.change-user-btn');
+    if(cb){ cb.textContent='ออกจากระบบ'; cb.onclick=logout; }
+  }
+
+  var gb=document.getElementById('guest-toast-banner');
+  if(gb) gb.style.display=isGuestMode?'flex':'none';
+}
+
+/* ── VERIFY STORED TOKEN ON INIT ── */
+function verifyStoredToken(callback){
+  var token=null, userData=null;
+  try{
+    token    = localStorage.getItem(AUTH_TOKEN_KEY);
+    var raw  = localStorage.getItem(AUTH_USER_KEY);
+    if(raw)  userData = JSON.parse(raw);
+  }catch(e){}
+
+  if(!token){ callback(false); return; }
+
+  // verify กับ GAS
+  fetch(GAS_URL, {
+    method:'POST',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({ action:'verify', token:token })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(res){
+    if(res.ok){
+      authToken   = token;
+      isGuestMode = false;
+      var u={ id:res.username, name:res.displayName, avatar:'👤' };
+      setUser(u);
+      applyAuthUI();
+      callback(true);
+    } else {
+      try{ localStorage.removeItem(AUTH_TOKEN_KEY); }catch(e){}
+      callback(false);
+    }
+  })
+  .catch(function(){
+    // offline → ใช้ข้อมูลที่เก็บไว้ชั่วคราว (graceful degradation)
+    if(userData){
+      authToken   = token;
+      isGuestMode = false;
+      setUser(userData);
+      applyAuthUI();
+      callback(true);
+    } else {
+      callback(false);
+    }
+  });
+}
 
 function openCredits(){ document.getElementById('credits-overlay').classList.add('show'); }
 function closeCredits(){ document.getElementById('credits-overlay').classList.remove('show'); }
@@ -1149,6 +1392,7 @@ function buildDocTableHTML(c, sessIdx){
 }
 
 function setDocScore(cid, sessIdx, docIdx, type, val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c.doctors[sessIdx][docIdx][type] = val; markEdit(cid);
@@ -1158,11 +1402,13 @@ function setDocScore(cid, sessIdx, docIdx, type, val){
   saveToStorage(); refreshOverview(cid);
 }
 function setDocName(cid, sessIdx, docIdx, val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c.doctors[sessIdx][docIdx].name = val; markEdit(cid); saveToStorage();
 }
 function addDoctor(cid, sessIdx){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   var nd = c.doctors[sessIdx].length+1;
@@ -1173,6 +1419,7 @@ function addDoctor(cid, sessIdx){
   saveToStorage();
 }
 function removeDoctor(cid, sessIdx, docIdx){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c||c.doctors[sessIdx].length<=1) return;
   c.doctors[sessIdx].splice(docIdx,1);
@@ -1292,6 +1539,7 @@ function buildHandSkillHTML(c, i){
 }
 
 function setHandSkill(cid, i, val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid}); if(!c)return;
   c.handSkill[i] = c.handSkill[i]===val ? '' : val; // toggle
   markEdit(cid);
@@ -1663,6 +1911,7 @@ function toggleSess(cid,idx){
   if(head) head.classList.toggle('open',!open);
 }
 function toggleDone(cid,idx){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c.sessions[idx].done=!c.sessions[idx].done;
@@ -1680,6 +1929,7 @@ function setDate(cid,idx,val){
   if(chip) chip.textContent=val;
 }
 function setStar(cid,idx,val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c.sat_stars[idx]=val; c.sat_count[idx]=Math.max(c.sat_count[idx],1); markEdit(cid);
@@ -1689,13 +1939,15 @@ function setStar(cid,idx,val){
   var cnt=document.getElementById('star-count-'+cid+'-'+idx);if(cnt)cnt.textContent='('+c.sat_count[idx]+' คนตอบ)';
   saveToStorage(); refreshOverview(cid);
 }
-function setNote(cid,idx,val){var c=clinics.find(function(x){return x.id===cid});if(c){c.notes[idx]=val;markEdit(cid);saveToStorage();}}
+function setNote(cid,idx,val){if(guardEdit()) return;var c=clinics.find(function(x){return x.id===cid});if(c){c.notes[idx]=val;markEdit(cid);saveToStorage();}}
 function setD14(cid,idx,field,val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c.d14[idx][field]=val; markEdit(cid); saveToStorage(); refreshOverview(cid);
 }
 function setField(cid,field,val){
+  if(guardEdit()) return;
   var c=clinics.find(function(x){return x.id===cid});
   if(!c) return;
   c[field]=val; markEdit(cid); saveToStorage(); refreshOverview(cid);
@@ -1731,6 +1983,7 @@ function onPkgChange(){
   document.getElementById('m-sess-wrap').style.display=pkg==='B'?'block':'none';
 }
 function openModal(){
+  if(guardEdit()) return;
   document.getElementById('modal-mode').value='add';
   document.getElementById('modal-title').textContent='เพิ่มคลินิกใหม่';
   document.getElementById('modal-sub').textContent='กรอกข้อมูลเบื้องต้นของคลินิก';
@@ -1766,6 +2019,7 @@ function editClinic(id){
 }
 function closeModal(){document.getElementById('modal-overlay').classList.remove('show');}
 function saveClinic(){
+  if(guardEdit()) return;
   var name=document.getElementById('m-name').value.trim();
   if(!name){alert('กรุณากรอกชื่อคลินิก');return;}
   var pkg=document.getElementById('m-pkg').value;
@@ -1791,6 +2045,7 @@ function saveClinic(){
   if(activeId) selectClinic(activeId);
 }
 function deleteClinic(){
+  if(guardEdit()) return;
   if(!confirm('ลบคลินิกนี้ออกจากระบบ?')) return;
   var cid=document.getElementById('modal-cid').value;
   clinics=clinics.filter(function(x){return x.id!==cid});
@@ -1826,16 +2081,19 @@ function init(){
   applyTheme(_t);
   document.getElementById('ls-text').textContent='กำลังโหลด...';
 
-  var savedId=loadUserPref();
-  if(savedId){ var u=TEAM.find(function(x){return x.id===savedId}); if(u) setUser(u); }
-
-  // แสดงแอปทันทีด้วย localStorage → GAS sync ทำงาน background
   _loadFromLocal();
   document.getElementById('loading-screen').classList.add('hidden');
   document.getElementById('app').style.display = isMob() ? 'block' : 'grid';
   renderSidebar();
-  if(!currentUser) setTimeout(openUserModal, 400);
-  loadFromGAS(); // background sync, ไม่บล็อก UI
+
+  // ตรวจสอบ token ที่เก็บไว้
+  verifyStoredToken(function(ok){
+    if(!ok){
+      // ไม่มี session → เปิด login modal
+      setTimeout(openUserModal, 400);
+    }
+    loadFromGAS();
+  });
 
   // sync across tabs — when another tab saves, reload local copy
   window.addEventListener('storage', function(e){
@@ -1871,6 +2129,8 @@ function hideMobSidebar(){
 ══════════════════════════════════════════════ */
 var _dashTab = 'overview';
 var _dashF = { status:'all', pkg:'all', cts:'all' };
+var _dashDateFrom = '';   // ISO string 'YYYY-MM-DD' หรือ ''
+var _dashDateTo   = '';   // ISO string 'YYYY-MM-DD' หรือ ''
 
 function showDashboard(){
   activeId = null;
@@ -1888,6 +2148,16 @@ function _dashApplyFilters(list){
       if(_dashF.status==='amber'  && !(sc!==null && sc>=50 && sc<70)) return false;
       if(_dashF.status==='red'    && !(sc!==null && sc<50)) return false;
       if(_dashF.status==='pending'&& sc!==null) return false;
+    }
+    if(_dashDateFrom){
+      var from = new Date(_dashDateFrom);
+      from.setHours(0,0,0,0);
+      if(_clinicMs(c) < from.getTime()) return false;
+    }
+    if(_dashDateTo){
+      var to = new Date(_dashDateTo);
+      to.setHours(23,59,59,999);
+      if(_clinicMs(c) > to.getTime()) return false;
     }
     return true;
   });
@@ -1909,6 +2179,9 @@ function _chipEl(key,val,label,active){
 }
 function _setDashF(key,val){ _dashF[key]=val; _renderDashboard(); }
 function _setDashTab(t){ _dashTab=t; _renderDashboard(); }
+function _setDateFrom(v){ _dashDateFrom = v||''; _renderDashboard(); }
+function _setDateTo(v){   _dashDateTo   = v||''; _renderDashboard(); }
+function _clearDateRange(){ _dashDateFrom=''; _dashDateTo=''; _renderDashboard(); }
 
 function _renderDashboard(){
   var main = document.getElementById('main');
@@ -1959,6 +2232,19 @@ function _renderDashboard(){
   h += _chipEl('cts','V','CTS-V',_dashF.cts==='V');
   h += _chipEl('cts','C','CTS-C',_dashF.cts==='C');
   h += _chipEl('cts','W','CTS-W',_dashF.cts==='W');
+  h += '</div>';
+
+  // ── Date range
+  h += '<div class="dash-daterange">';
+  h += '<span class="dr-label">📅 ช่วงวันที่สร้าง</span>';
+  h += '<input type="date" class="dr-input" id="dr-from" value="'+_dashDateFrom+'"'
+     + ' onchange="_setDateFrom(this.value)">';
+  h += '<span class="dr-sep">—</span>';
+  h += '<input type="date" class="dr-input" id="dr-to" value="'+_dashDateTo+'"'
+     + ' onchange="_setDateTo(this.value)">';
+  h += '<button class="dr-clear" onclick="_clearDateRange()"'
+     + (_dashDateFrom||_dashDateTo ? '' : ' style="display:none"')
+     + '>✕ ล้าง</button>';
   h += '</div>';
 
   // ── Tabs
@@ -2152,5 +2438,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+<div id="guest-toast">👁️ Guest Mode — ไม่สามารถแก้ไขได้</div>
 </body>
 </html>

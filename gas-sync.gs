@@ -34,6 +34,20 @@ function doPost(e) {
       throw new Error('Payload parsed but is not a valid object: ' + typeof body);
     }
 
+    // ── Login / token (ใหม่ — ไม่กระทบ sync เดิม) ──
+    if (body.action === 'login') {
+      return handleLogin(body.username, body.password);
+    }
+    if (body.action === 'verify') {
+      var info = verifyToken(body.token);
+      return ContentService
+        .createTextOutput(JSON.stringify(
+          info ? { ok: true, username: info.username, displayName: info.displayName }
+               : { ok: false }
+        ))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
     if (body.action === 'upload') {
       return _uploadToDrive(body);
     }
@@ -127,4 +141,83 @@ function _load() {
       .createTextOutput(JSON.stringify({ error: err.message, data: '[]', ts: 0 }))
       .setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// ════════════════════════════════════════════════
+//  LOGIN (ใหม่) — Users sheet + token ใน ScriptProperties
+// ════════════════════════════════════════════════
+
+// ใช้ openById(SPREADSHEET_ID) ให้ตรงกับโค้ดเดิม (standalone script — getActiveSpreadsheet เป็น null)
+function ensureUsersSheet() {
+  var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  var sheet = ss.getSheetByName('Users');
+  if (!sheet) {
+    sheet = ss.insertSheet('Users');
+    sheet.getRange('A1:C1').setValues([['username','password','displayName']]);
+    var defaults = [
+      ['parichat',   'cts1234', 'Parichat'],
+      ['kanwara',    'cts1234', 'Kanwara'],
+      ['narakamon',  'cts1234', 'Narakamon'],
+      ['witchukorn', 'cts1234', 'Witchukorn'],
+      ['koollanut',  'cts1234', 'Koollanut'],
+      ['pariyachat', 'cts1234', 'Pariyachat'],
+      ['pitchaporn', 'cts1234', 'Pitchaporn'],
+      ['onkamol',    'cts1234', 'Onkamol']
+    ];
+    sheet.getRange(2, 1, defaults.length, 3).setValues(defaults);
+  }
+  return sheet;
+}
+
+function handleLogin(username, password) {
+  var sheet = ensureUsersSheet();
+  var data  = sheet.getDataRange().getValues();
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim() === String(username).trim() &&
+        String(data[i][1]).trim() === String(password).trim()) {
+
+      var token  = Utilities.getUuid();
+      var expiry = new Date().getTime() + (8 * 60 * 60 * 1000); // 8 ชม.
+      PropertiesService.getScriptProperties()
+        .setProperty('tok_' + token, username + '|' + data[i][2] + '|' + expiry);
+
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          ok: true, token: token, username: username, displayName: data[i][2]
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  return ContentService
+    .createTextOutput(JSON.stringify({ ok: false, error: 'invalid' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function verifyToken(token) {
+  if (!token) return null;
+  var val = PropertiesService.getScriptProperties().getProperty('tok_' + token);
+  if (!val) return null;
+
+  var parts  = val.split('|');
+  var expiry = parseInt(parts[2]);
+  if (new Date().getTime() > expiry) {
+    PropertiesService.getScriptProperties().deleteProperty('tok_' + token);
+    return null;
+  }
+  return { username: parts[0], displayName: parts[1] };
+}
+
+// Time-driven trigger (รายวัน เที่ยงคืน): ล้าง token หมดอายุ
+function cleanExpiredTokens() {
+  var props = PropertiesService.getScriptProperties().getProperties();
+  var now   = new Date().getTime();
+  Object.keys(props).forEach(function(key) {
+    if (key.indexOf('tok_') !== 0) return;
+    var expiry = parseInt(props[key].split('|')[2]);
+    if (now > expiry) {
+      PropertiesService.getScriptProperties().deleteProperty(key);
+    }
+  });
 }
