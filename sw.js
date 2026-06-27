@@ -1,5 +1,5 @@
-var CACHE = 'cts-v13';
-var ASSETS = ['./', './index.html', './manifest.json', './icons/icon.svg', './MA-Logo_Black.png'];
+var CACHE = 'cts-v16';
+var ASSETS = ['./', './index.html', './manifest.json', './icons/icon.jpg', './MA-Logo_Black.png'];
 
 self.addEventListener('install', function(e) {
   e.waitUntil(
