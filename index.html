@@ -119,6 +119,7 @@ body{font-family:'Inter','Sarabun',sans-serif;background:var(--paper);color:var(
 .cb-info{flex:1;min-width:0}
 .cb-name{font-weight:600;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--ink)}
 .cb-meta{font-size:9.5px;color:var(--ink3);margin-top:1px;display:flex;align-items:center;gap:4px}
+.cb-date{font-size:9.5px;color:var(--ink3);margin-top:2px;display:flex;align-items:center;gap:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cb-pkg-tag{font-size:8.5px;padding:1px 5px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace}
 .tag-e{background:var(--entry-l);color:var(--entry)}
 .tag-a{background:var(--blue-l);color:var(--blue)}
@@ -1209,7 +1210,7 @@ function calcScore(c){
     if(d!==null) sessionDeltas.push(d);
   }
   var avgDelta=sessionDeltas.length?sessionDeltas.reduce(function(a,b){return a+b},0)/sessionDeltas.length:null;
-  var deltaPct=avgDelta!==null?Math.min(100,Math.max(0,(avgDelta/5)*100)):null;
+  var deltaPct=avgDelta!==null?Math.min(100,Math.max(0,(avgDelta/2.5)*100)):null; // scale 1–5: delta 2.5 = 100% (เดิม 1–10 หาร 5)
   var satArr=[];
   for(var i=0;i<n;i++){
     if(c.sessions[i].done&&c.sat_stars[i]>0) satArr.push((c.sat_stars[i]/5)*100);
@@ -1309,6 +1310,7 @@ function renderSidebar(){
       <div class="cb-info">
         <div class="cb-name">${c.name}</div>
         <div class="cb-meta"><span class="cb-pkg-tag ${tagCls}">${pkgLbl}</span>${c.level==='std'?'Standard':'Advanced'} · ${c.numDocs} Dr · CTS-${c.ctsTeam}</div>
+        ${c.startDate?`<div class="cb-date">📅 เริ่มเทรน ${c.startDate}</div>`:''}
         <div class="session-progress"><div class="sp-fill" style="width:${prog}%"></div></div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
@@ -1341,13 +1343,13 @@ function buildDocTableHTML(c, sessIdx){
   if(!docs.length) return '<div style="font-size:11px;color:var(--ink3);padding:4px 0">ยังไม่มีคุณหมอในรอบนี้ — กด "+ เพิ่มคุณหมอ"</div>';
 
   var preHeader='', postHeader='';
-  for(var v=1;v<=10;v++){
+  for(var v=1;v<=5;v++){
     preHeader+='<th style="width:22px;text-align:center;padding:4px 2px">'+v+'</th>';
   }
 
   var rows = docs.map(function(doc, di){
     var preBtns='', postBtns='';
-    for(var v=1;v<=10;v++){
+    for(var v=1;v<=5;v++){
       var pSel = doc.pre===v ? 'sel-pre' : '';
       var poSel = doc.post===v ? 'sel-post' : '';
       preBtns += `<button class="sb-btn ${pSel}" style="width:22px;height:22px;font-size:9px" onclick="setDocScore('${c.id}',${sessIdx},${di},'pre',${v})">${v}</button>`;
@@ -1377,8 +1379,8 @@ function buildDocTableHTML(c, sessIdx){
   return `<table class="doc-table">
     <thead><tr>
       <th style="width:130px">คุณหมอ</th>
-      <th>ก่อนเทรน (1–10)</th>
-      <th>หลังเทรน (1–10)</th>
+      <th>ก่อนเทรน (1–5)</th>
+      <th>หลังเทรน (1–5)</th>
       <th style="width:70px">Delta</th>
       <th style="width:24px"></th>
     </tr></thead>
@@ -1714,7 +1716,7 @@ function renderClinic(c){
           <div class="m-input-area"><input type="text" class="date-in" placeholder="เช่น 5 พ.ค. 68" value="${ds.date||''}" oninput="setDate('${c.id}',${i},this.value)"></div>
         </div>
 
-        <div class="m-group-title" style="margin:12px 0 8px">🎯 CTS Assessment — ประเมินรายคุณหมอ (1–10) คะแนน avg ถูกนำไปคิดรวม</div>
+        <div class="m-group-title" style="margin:12px 0 8px">🎯 CTS Assessment — ประเมินรายคุณหมอ (1–5) คะแนน avg ถูกนำไปคิดรวม</div>
         <div id="doc-table-wrap-${c.id}-${i}">
           ${buildDocTableHTML(c,i)}
         </div>
