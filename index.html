@@ -665,7 +665,7 @@ select.f-sel{width:100%;border:1.5px solid var(--border);border-radius:7px;font-
       </div>
     </div>
     <label class="f-label">วันที่เริ่มเทรน</label>
-    <input type="text" class="f-in" id="m-date" placeholder="เช่น 1 พ.ค. 2568">
+    <input type="date" class="f-in" id="m-date">
     <div class="modal-btns">
       <button class="btn btn-danger" id="delete-btn" onclick="deleteClinic()" style="display:none">ลบคลินิกนี้</button>
       <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
@@ -1189,6 +1189,15 @@ function verifyStoredToken(callback){
 function openCredits(){ document.getElementById('credits-overlay').classList.add('show'); }
 function closeCredits(){ document.getElementById('credits-overlay').classList.remove('show'); }
 
+// แปลงค่าวันที่ ISO (YYYY-MM-DD จาก date picker) → ไทย เช่น "1 พ.ค. 2568"; ข้อความเดิมคืนค่าตามเดิม
+function fmtDate(v){
+  if(!v) return '';
+  var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(v);
+  if(!m) return v;
+  var d=new Date(+m[1],+m[2]-1,+m[3]);
+  return isNaN(d)?v:d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'});
+}
+
 /* ═══ SCORING ═══ */
 function getSessionDelta(c, i){
   // avg delta across all doctors in this session
@@ -1310,7 +1319,7 @@ function renderSidebar(){
       <div class="cb-info">
         <div class="cb-name">${c.name}</div>
         <div class="cb-meta"><span class="cb-pkg-tag ${tagCls}">${pkgLbl}</span>${c.level==='std'?'Standard':'Advanced'} · ${c.numDocs} Dr · CTS-${c.ctsTeam}</div>
-        ${c.startDate?`<div class="cb-date">📅 เริ่มเทรน ${c.startDate}</div>`:''}
+        ${c.startDate?`<div class="cb-date">📅 เริ่มเทรน ${fmtDate(c.startDate)}</div>`:''}
         <div class="session-progress"><div class="sp-fill" style="width:${prog}%"></div></div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
